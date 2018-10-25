@@ -12,7 +12,7 @@ def redistribution_step(bank):
     return bank
 
 def find_steps_for_cicle(bank):
-    memory = []
+    memory = {}
     steps = 1
 
     while True:
@@ -20,9 +20,9 @@ def find_steps_for_cicle(bank):
         _hash = ':'.join(str(x) for x in result)
 
         if _hash not in memory:
-            memory.append(_hash)
+            memory[_hash] = steps
         else:
-            return steps
+            return (steps, memory[_hash])
 
         steps += 1
 
@@ -37,7 +37,9 @@ result = redistribution_step([3, 1, 2, 3])
 assert result == [0, 2, 3, 4]
 
 result = find_steps_for_cicle([0, 2, 7, 0])
-assert result == 5
+assert result[0] == 5
 
 # Calculate the result
-print(find_steps_for_cicle([4, 10, 4, 1, 8, 4, 9, 14, 5, 1, 14, 15, 0, 15, 3, 5]))
+result = find_steps_for_cicle([4, 10, 4, 1, 8, 4, 9, 14, 5, 1, 14, 15, 0, 15, 3, 5])
+print("a: ", result[0])
+print("b: ", result[0] - result[1])
