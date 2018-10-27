@@ -36,9 +36,7 @@ def calculate_register_value(register_value, operant, how_much) -> int:
     raise TypeError(f'unknown operant: {operant}')
 
 
-def do_program(source_input):
-    registers = {}
-
+def do_program(source_input, registers):
     for line in source_input:
         condition_register_name = line[0]
         condition_register_value = registers.get(condition_register_name, 0)
@@ -48,11 +46,17 @@ def do_program(source_input):
             register_value = registers.get(register_name, 0)
             value = calculate_register_value(register_value, line[4], line[5])
             registers[register_name] = value
+            yield value
 
     return registers
 
 
-memory = do_program(parser('input.txt'))
-largest = max(memory.values())
+registers = {}
+the_greated_value = 0
+for value in do_program(parser('input.txt'), registers):
+    if value > the_greated_value:
+        the_greated_value = value
 
-print(f"Largest: {largest}")
+largest = max(registers.values())
+print(f"Largest value in register: {the_greated_value}")
+print(f"Largest in registers after: {largest}")
