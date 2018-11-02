@@ -25,13 +25,32 @@ def distance(begin, end):
     return (abs(begin[0] - end[0]) + abs(begin[1] - end[1]) + abs(begin[2] - end[2])) / 2
 
 
-def count_distance_for_path(path):
-    start = (0, 0, 0)
+def move_on_path(start, path: [str]):
     point = start
     for where in path:
         point = move(point, where)
+        yield point
 
-    return distance(start, point)
+
+def count_distance_for_path(path: [str]):
+    start = (0, 0, 0)
+    result = start
+    for point in move_on_path(start, path):
+        result = point
+
+    return distance(start, result)
+
+
+def calculate_the_farst(path):
+    start = (0, 0, 0)
+    the_farest = 0    
+    
+    for point in move_on_path(start, path):
+        tmp = distance(start, point)
+        if tmp > the_farest:
+            the_farest = tmp
+
+    return the_farest
 
 
 assert count_distance_for_path([ne,ne,ne]) == 3
@@ -42,4 +61,6 @@ assert count_distance_for_path([se,sw,se,sw,sw]) == 3
 input = [
     # input fill up with content of https://adventofcode.com/2017/day/11/input
 ]
+
 print("Solution (first part):", count_distance_for_path(input))
+print("Solution (second part):", calculate_the_farst(input))
