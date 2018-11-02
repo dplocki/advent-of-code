@@ -26,3 +26,12 @@ def find_all_in_group(dictionary: {}, node: int, already_acounted: set = set()) 
 
 dictionary = {root: children for root, children in parser('input.txt')}
 print("Solution for first part:", len(find_all_in_group(dictionary, 0)))
+
+groups = 0
+checked = []
+for k, _ in dictionary.items():
+    if k not in checked:
+        checked += find_all_in_group(dictionary, k)
+        groups += 1
+
+print("Solution for second part:", groups)
