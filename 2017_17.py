@@ -47,3 +47,33 @@ assert solution_for(3) == 638
 
 
 print('Solution for first part:', solution_for(343))
+
+
+def spinlock_on_1st(step_lenght):
+    iteration_number = 1
+    index = 0
+
+    while True:
+        index = (index + step_lenght) % iteration_number + 1
+        if index == 1:
+            yield iteration_number
+
+        iteration_number += 1
+
+
+spinlock_on_1st_test = spinlock_on_1st(3)
+assert next(spinlock_on_1st_test) == 1
+assert next(spinlock_on_1st_test) == 2
+assert next(spinlock_on_1st_test) == 5
+assert next(spinlock_on_1st_test) == 9
+
+generator = spinlock_on_1st(343)
+result = 0
+while True:
+    tmp = next(generator)
+    if tmp < 50_000_000:
+        result = tmp
+    else:
+        break
+
+print('Solution for first part:', result)
