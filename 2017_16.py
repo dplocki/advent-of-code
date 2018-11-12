@@ -193,11 +193,42 @@ test_of_instruction('eabcd', 'x3/4', 'eabdc')
 test_of_instruction('eabdc', 'pe/b', 'baedc')
 
 
+def run_instruction_file(list: List, instruction_list: [str]):
+    for instuction in instruction_list:
+        run_instruction(list, instuction)
+
+    return list
+
+
+def read_line_from_file(file_name):
+    with open(file_name) as file:
+        for line in file:
+            yield line[:-1]
+
+
+# First part of task
 import string
 
-list = List(string.ascii_lowercase[:16])
-with open('input.txt') as file:
-    for line in file:
-        run_instruction(list, line[:-1])
+base = string.ascii_lowercase[:16]
+list = List(base)
+run_instruction_file(list, read_line_from_file('input.txt'))
+result = list.to_string()
 
-print('Solution for first part:', list.to_string())
+print('Solution for first part:', result)
+
+
+def build_cycle_list(base_string, instructions):
+    cycle = [base_string]
+    list = List(base_string)
+
+    while True:
+        run_instruction_file(list, instructions)
+        result = list.to_string()
+        if result not in cycle:
+            cycle.append(result)
+        else:
+            return cycle
+
+
+cycle = build_cycle_list(base, [_ for _ in read_line_from_file('input.txt')])
+print('Solution for second part:', cycle[1_000_000_000 % len(cycle)])
