@@ -230,5 +230,6 @@ def build_cycle_list(base_string, instructions):
             return cycle
 
 
+# The input file get from: https://adventofcode.com/2017/day/16/input with comas replaced by newline
 cycle = build_cycle_list(base, [_ for _ in read_line_from_file('input.txt')])
 print('Solution for second part:', cycle[1_000_000_000 % len(cycle)])
