@@ -1,24 +1,37 @@
 import string
 
 
-def react_simpulator(input):
-    letter_combinations = [letter + letter.upper() for letter in string.ascii_lowercase] + [letter.upper() + letter for letter in string.ascii_lowercase]
+LETTER_COMBINATIONS = [letter + letter.upper() for letter in string.ascii_lowercase] + [letter.upper() + letter for letter in string.ascii_lowercase]
 
-    previous_lenght = 0
-    current_lenght = len(input)
 
-    while previous_lenght != current_lenght: 
-        previous_lenght = current_lenght
+def calculate_length_after_all_reactions(input: str):
+    previous_length = 0
+    current_length = len(input)
 
-        for letter_combination in letter_combinations:
+    while previous_length != current_length: 
+        previous_length = current_length
+
+        for letter_combination in LETTER_COMBINATIONS:
             input = input.replace(letter_combination, '')
 
-        current_lenght = len(input)
+        current_length = len(input)
 
-    return current_lenght
+    return current_length
 
 
-assert react_simpulator('dabAcCaCBAcCcaDA') == 10
+def find_the_shortes_polymer(input: str):
+    return min([
+        calculate_length_after_all_reactions(input.replace(letter, '').replace(letter.upper(), ''))
+        for letter in string.ascii_lowercase
+    ])
+
+
+assert calculate_length_after_all_reactions('dabAcCaCBAcCcaDA') == 10
 
 # See: https://adventofcode.com/2018/day/5/input
-print("Solution for first part:", react_simpulator('<puzzle input>'))
+puzzle_input = '<puzzle input>'
+print("Solution for first part:", calculate_length_after_all_reactions(puzzle_input))
+
+assert find_the_shortes_polymer('dabAcCaCBAcCcaDA') == 4
+
+print("Solution for second part:", find_the_shortes_polymer(puzzle_input))
