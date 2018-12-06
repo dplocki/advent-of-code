@@ -23,10 +23,12 @@ class Point:
     def __repr__(self):
         return self.__str__()
 
+
 class Coordinate(Point):
     def __init__(self, id, x, y):
         Point.__init__(self, x, y)
         self.id = id
+
 
 def parse_lines(lines: []) -> [Coordinate]:
     id = 1
@@ -164,3 +166,24 @@ def load_file(file_name):
 
 # The input taken from: https://adventofcode.com/2018/day/6/input
 print('Solution for first part:', calculate_solution_for_first_part(load_file('input.txt')))
+
+
+def find_area_size_for_limit(coordinates: [Coordinate], limit: int, left_top: Point, right_bottom: Point):
+    all_points = [Point(x, y) for x in range(left_top.x, right_bottom.x) for y in range(left_top.y, right_bottom.y)]
+    within_area = filter(lambda x: x < limit, [sum([point.distance(coordinate) for coordinate in coordinates]) for point in all_points])
+
+    return len(list(within_area))
+
+
+assert find_area_size_for_limit(parsed_test_result, 32, *test_border_points) == 16
+
+
+def calculate_solution_for_second_part(input: [str]):
+    coordinates = [_ for _ in parse_lines(input)]
+    border_points = calculate_size_of_finit_part(coordinates)
+
+    return find_area_size_for_limit(coordinates, 10000, *border_points)
+
+
+# The input taken from: https://adventofcode.com/2018/day/6/input
+print('Solution for second part:', calculate_solution_for_second_part(load_file('input.txt')))
