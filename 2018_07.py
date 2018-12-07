@@ -107,3 +107,64 @@ def load_file(file_name):
 # Taken from https://adventofcode.com/2018/day/7/input
 graph = build_graph_table(parse_input(load_file('input.txt')))
 print('Solution for the first part:', walk_on_the_graph(graph))
+
+
+def simple_time_for_step(step: str): return ord(step[0]) - ord('A') + 1
+def time_for_step(step: str): return simple_time_for_step(step) + 60
+
+
+assert time_for_step('A') == 61
+assert time_for_step('Z') == 86
+
+
+def work_concurency_simpulator(graph, workers_number, time_for_step):
+    done = ''
+    elf_work_on = [None] * workers_number
+    seconds = 0
+    working_on = []
+
+    while True:
+        # Elf working!
+        for index in range(workers_number):
+            elf_is_working_on = elf_work_on[index]
+            if not elf_is_working_on:
+                continue
+
+            step, time_left = elf_is_working_on
+
+            time_left -= 1
+            if time_left != 0:
+                elf_work_on[index] = (step, time_left)
+            else:
+                elf_work_on[index] = None
+                done += step
+
+        # Check what steps are avaible
+        avaible_steps = find_all_avaible_steps(graph, done)
+        avaible_steps.reverse()
+        for work_going_on in working_on:
+            if work_going_on in avaible_steps:
+                avaible_steps.remove(work_going_on)
+
+        # Elf seeking work
+        for index in range(workers_number):
+            tmp = elf_work_on[index]
+            if not tmp and avaible_steps:
+                new_step = avaible_steps.pop()
+                elf_work_on[index] = (new_step, time_for_step(new_step))
+
+        # Visualization
+        # print(seconds, '|', '  '.join([w[0] if w else '.' for w in elf_work_on]), '|', done)
+
+        # Check who is working...
+        working_on = [e[0] for e in elf_work_on if e]
+        if not working_on:
+            return seconds
+
+        # Tempus fugit
+        seconds += 1
+
+
+assert work_concurency_simpulator(test_result_graph_table, 2, simple_time_for_step) == 15
+
+print('Solution for second part:', work_concurency_simpulator(graph, 4, time_for_step))
