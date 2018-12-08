@@ -5,6 +5,7 @@ test_map = '''     |
      |  |  |  D 
      +B-+  +--+ '''.split('\n')
 
+
 def get_point(map: [str], point):
     try:
         return map[point[1] - 1][point[0] - 1]
@@ -68,8 +69,21 @@ def solution_to_first_part(map: [str]):
 
 assert solution_to_first_part(test_map) == 'ABCDEF'
 
+
+def count_step_walker(map: [str]):
+    result = 1
+    for _ in walk_on_map(map):
+        result += 1
+
+    return result
+
+
+assert count_step_walker(test_map) == 38
+
+
 # Input taken from https://adventofcode.com/2017/day/19/input
 with open("input.txt", "r") as file:
     file_input = file.read().splitlines()
 
     print('Solution for the first part:', solution_to_first_part(file_input))
+    print('Solution for the second part:', count_step_walker(file_input))
