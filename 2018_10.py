@@ -120,19 +120,25 @@ def score_generator(input):
     points, vectors = get_points_and_velocities(input)
     prev_field = sys.maxsize
     prev_points = None
+    seconds = 0
 
     while True:
         field = calculate_field(points)
         if field > prev_field:
-            return prev_points
+            return prev_points, seconds - 1
 
         prev_field = field
         prev_points = points
 
         points = second_passing(points, vectors)
+        seconds += 1
 
+
+_, test_time_result = score_generator(parser(test_input))
+assert test_time_result == 3
 
 # Taken from https://adventofcode.com/2018/day/10/input
-points = score_generator(parser(read_line_from_file('input.txt')))
+points, seconds = score_generator(parser(read_line_from_file('input.txt')))
 print("Solution to first part:")
 print(ligths_to_string(points))
+print("Solution to second part:", seconds)
