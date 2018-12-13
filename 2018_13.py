@@ -158,6 +158,21 @@ def move_cart(cart, area):
     return cart.position
 
 
+def is_collision(carts):
+    return len(set([c.position for c in carts])) != len(carts)
+
+
+def find_collision(area, carts):
+    while True:
+        carts.sort()
+
+        for cart in carts:
+            cart_position = move_cart(cart, area)
+
+            if is_collision(carts):
+                return cart_position
+
+
 test_1_input = '''/->-\\        
 |   |  /----\\
 | /-+--+-\\  |
@@ -174,22 +189,6 @@ v
 |'''.splitlines()
 
 
-def is_collision(carts):
-    return len(set([c.position for c in carts])) != len(carts)
-
-
-def find_collision(area, carts):
-    while True:
-        carts.sort()
-
-        for cart in carts:
-            cart_position = move_cart(cart, area)
-
-            if is_collision(carts):
-                return cart_position
-
-
-
 assert find_collision(*parse_tokens(parser(test_2_input))) == (4, 0)
 assert find_collision(*parse_tokens(parser(test_3_input))) == (0, 3)
 assert find_collision(*parse_tokens(parser(test_1_input))) == (7, 3)
@@ -201,3 +200,40 @@ file.close()
 
 result_position = find_collision(*parse_tokens(parser(input_lines)))
 print(f"Solution of first part: {result_position[0]},{result_position[1]} ")
+
+
+def find_last_cart(area: {}, carts: [Cart]):
+    to_removed = []
+
+    while True:
+        for r in to_removed:
+            carts.remove(r)
+
+        to_removed = []
+        if len(carts) == 1:
+            return carts[0].position
+
+        carts.sort()
+        for cart in carts:
+            if cart in to_removed:
+                continue
+
+            cart_position = move_cart(cart, area)
+            carts_on_position = [cart for cart in carts if cart.position == cart_position]
+
+            if len(carts_on_position) > 1:
+                to_removed.extend(carts_on_position)
+
+
+test_4_input = '''/>-<\\  
+|   |  
+| /<+-\\
+| | | v
+\\>+</ |
+  |   ^
+  \\<->/'''.splitlines()
+
+assert find_last_cart(*parse_tokens(parser(test_4_input))) == (6, 4)
+
+result_last_cart_position = find_last_cart(*parse_tokens(parser(input_lines)))
+print(f"Solution of second part: {result_last_cart_position[0]},{result_last_cart_position[1]} ")
