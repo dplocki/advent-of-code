@@ -1,3 +1,6 @@
+from collections import deque
+
+
 def state_generator():
     state = [3, 7]
     first_elf_index = 0
@@ -44,3 +47,25 @@ test(18, '9251071085')
 test(2018, '5941429882')
 
 print("Solution for first part:", get_score_after(640441))
+
+
+def find_first_appear(seek: str):
+    index = 0
+    generator = state_generator()
+    actual = deque(maxlen=len(seek))
+    compear = deque([int(s) for s in seek])
+
+    while True:
+        actual.append(next(generator))
+        if actual == compear:
+            return index - len(seek) + 1
+
+        index += 1
+
+
+assert find_first_appear('51589') == 9
+assert find_first_appear('01245') == 5
+assert find_first_appear('92510') == 18
+assert find_first_appear('59414') == 2018
+
+print("Solution for second part:", find_first_appear('640441'))
