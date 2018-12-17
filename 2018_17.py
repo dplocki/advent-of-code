@@ -31,20 +31,21 @@ def calculate_map_size(_map: set):
 
 class SourcesSimulator:
 
-    def __init__(self, _map):
-        self.clay_titles = _map
-        (self.min_x, self.max_x), (self.min_y, self.max_y) = calculate_map_size(_map)
-        self.watter_tiles = set()
+    def __init__(self, clay_tiles):
+        self.clay_tiles = clay_tiles
+        (self.min_x, self.max_x), (self.min_y, self.max_y) = calculate_map_size(clay_tiles)
         self.sources = set([(500, 0)])
+
         self.potential_spreading_point = set()
         self.standing_watter = set()
+        self.watter_tiles = set()
 
     def add_watter_tile(self, point):
         if point[1] >= self.min_y and point[1] <= self.max_y:
             self.watter_tiles.add(point)
 
     def add_source_if_can(self, point):
-        if point in self.clay_titles:
+        if point in self.clay_tiles:
             return
 
         if point in self.watter_tiles:
@@ -56,12 +57,12 @@ class SourcesSimulator:
         new_point = point
         while True:
             # checking below
-            if not (new_point[0], new_point[1] + 1) in self.clay_titles \
+            if not (new_point[0], new_point[1] + 1) in self.clay_tiles \
                 and not (new_point[0], new_point[1] + 1) in self.watter_tiles:
                 return None
 
             # checking wall on left
-            if (new_point[0] - 1, new_point[1]) in self.clay_titles:
+            if (new_point[0] - 1, new_point[1]) in self.clay_tiles:
                 return new_point[0]
 
             new_point = (new_point[0] - 1, new_point[1])
@@ -69,11 +70,11 @@ class SourcesSimulator:
     def seek_on_right(self, point):
         new_point = point
         while True:
-            if not (new_point[0], new_point[1] + 1) in self.clay_titles \
+            if not (new_point[0], new_point[1] + 1) in self.clay_tiles \
                 and not (new_point[0], new_point[1] + 1) in self.watter_tiles:
                 return None
 
-            if (new_point[0] + 1, new_point[1]) in self.clay_titles:
+            if (new_point[0] + 1, new_point[1]) in self.clay_tiles:
                 return new_point[0]
 
             new_point = (new_point[0] + 1, new_point[1])
@@ -95,7 +96,7 @@ class SourcesSimulator:
            
             tile_below = (source[0], source[1] + 1)
 
-            if tile_below in self.clay_titles or tile_below in self.standing_watter:
+            if tile_below in self.clay_tiles or tile_below in self.standing_watter:
                 left = self.seek_on_left(source)
                 right = self.seek_on_right(source)
 
@@ -117,7 +118,7 @@ class SourcesSimulator:
     def visualisation(self):
         for y in range(self.min_y - 1, self.max_y + 2):
             for x in range(self.min_x - 1, self.max_x + 2):
-                if (x, y) in self.clay_titles:
+                if (x, y) in self.clay_tiles:
                     print('#', end='')
                 else:
                     if (x, y) in self.standing_watter:
@@ -143,24 +144,21 @@ def parser(file_name):
             yield line.strip()
 
 
-test_input = '''x=495, y=2..7
+test_map_1 = input_to_map('''x=495, y=2..7
 y=7, x=495..501
 x=501, y=3..7
 x=498, y=2..4
 x=506, y=1..2
 x=498, y=10..13
 x=504, y=10..13
-y=13, x=498..504'''.splitlines()
+y=13, x=498..504'''.splitlines())
+ 
+assert calculate_map_size(test_map_1) == ((495, 506), (1, 13))
 
-test_map = input_to_map(test_input)
+test_simulator_1 = SourcesSimulator(test_map_1)
+test_simulator_1.run()
 
-test_map_size = calculate_map_size(test_map)
-assert test_map_size == ((495, 506), (1, 13))
-
-test_simulator = SourcesSimulator(test_map)
-test_simulator.run()
-
-assert len(test_simulator.watter_tiles) == 57
+assert len(test_simulator_1.watter_tiles) == 57
 
 test_map_2 = input_to_map('''x=495, y=2..12
 y=12, x=495..510
@@ -172,9 +170,9 @@ x=510, y=3..12
 x=512, y=1..2
 '''.splitlines())
 
-test_simulator = SourcesSimulator(test_map_2)
-test_simulator.run()
-assert len(test_simulator.watter_tiles) == 97
+test_simulator_2 = SourcesSimulator(test_map_2)
+test_simulator_2.run()
+assert len(test_simulator_2.watter_tiles) == 97
 
 # The input taken from: https://adventofcode.com/2018/day/17/input 
 map_input = input_to_map(parser('input.17.txt'))
@@ -183,3 +181,7 @@ first_part_simulator.run()
 
 print("Solution for first part:", len(first_part_simulator.watter_tiles))
 # first_part_simulator.visualisation()
+
+assert len(test_simulator_1.standing_watter) == 29
+
+print("Solution for second part:", len(first_part_simulator.standing_watter))
