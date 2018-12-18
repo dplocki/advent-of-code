@@ -41,14 +41,22 @@ def run_turn(state: {}):
     return result
 
 
-def solution_to_first_part(initial_state):
+def turn_generator(initial_state):
     state = initial_state
-    for _ in range(10):
+
+    while True:
         state = run_turn(state)
+        state_values = list(state.values())
+        yield state_values.count(LUMBERJACK) * state_values.count(TREES)
 
-    state_values = list(state.values())
 
-    return state_values.count(LUMBERJACK) * state_values.count(TREES)
+def solution_to_first_part(initial_state):
+    generator = turn_generator(initial_state)
+
+    for _, result in zip(range(10), generator):
+        pass
+
+    return result
 
 
 def read_file(file_name):
@@ -73,3 +81,16 @@ assert solution_to_first_part(test_input) == 1147
 
 # Input taken from: https://adventofcode.com/2018/day/18/input
 print("Solution for first part:", solution_to_first_part(parse_input(read_file('input.18.txt'))))
+
+
+previouse_values = [result for _, result in zip(range(1000), turn_generator(parse_input(read_file('input.18.txt'))))]
+cycle_start = previouse_values.index(previouse_values[-1])
+while True:
+    if previouse_values.count(previouse_values[cycle_start - 1]) > 3:
+        cycle_start -= 1
+    else:
+        break
+
+cycle_lenght = previouse_values.index(previouse_values[cycle_start], cycle_start + 1) - cycle_start
+
+print("Solution for second part:", previouse_values[cycle_start - 1 + (1000000000 - cycle_start) % cycle_lenght])
