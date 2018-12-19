@@ -203,13 +203,13 @@ def run_program(opt_codes_to_instruction, program: [str]):
 
     return registers
 
+if __name__ == "__main__":
+    assert len(checking_sample([3, 2, 1, 1], [9, 2, 1, 2], [3, 2, 2, 1])) == 3
 
-assert len(checking_sample([3, 2, 1, 1], [9, 2, 1, 2], [3, 2, 2, 1])) == 3
+    # Input taken from: https://adventofcode.com/2018/day/16/input (only first part)
+    print("Solution for first part:", how_many_samples_match_3_or_more(parse_input_file('input.first_part.txt')))
 
-# Input taken from: https://adventofcode.com/2018/day/16/input (only first part)
-print("Solution for first part:", how_many_samples_match_3_or_more(parse_input_file('input.first_part.txt')))
+    # Input taken from: https://adventofcode.com/2018/day/16/input (only second part)
+    program = parse_program_file('input.second_part.txt')
 
-# Input taken from: https://adventofcode.com/2018/day/16/input (only second part)
-program = parse_program_file('input.second_part.txt')
-
-print("Solution for second part:", run_program(translate_opt_codes(parse_input_file('input.first_part.txt')), program)[0])
+    print("Solution for second part:", run_program(translate_opt_codes(parse_input_file('input.first_part.txt')), program)[0])
