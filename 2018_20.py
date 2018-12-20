@@ -68,7 +68,7 @@ def get_neighborns(doors: set, point):
     ]
 
 
-def find_the_longest_path(doors: set):
+def calculate_paths_for_all_rooms(doors: set):
     frontier = [(0, 0)]
     distance = {}
     distance[(0, 0)] = 0
@@ -82,26 +82,33 @@ def find_the_longest_path(doors: set):
                 frontier.append(next)
                 distance[next] = new_path
 
-    return max(distance.values())
+    return distance
+
+
+def find_the_longest_path(room_paths: {}):
+    return max(room_paths.values())
+
+
+def calculate_rooms_with_path_atleast_1000(room_paths: {}):
+    return len([x for x in room_paths.values() if x >= 1000])
 
 
 assert recreate_doors('^WNE$') == set([(-1, 0), (-2, -1), (-1, -2)])
 
 test_doors_set_1 = recreate_doors('^N(E|W)N$')
-visualisation(recreate_doors('^N(E|W)N$'))
-
 assert test_doors_set_1 == set([(0, -1), (1, -2), (0, -3), (-1, -2)])
 assert get_neighborns(test_doors_set_1, (0, 0)) == [(0, -2)]
 assert get_neighborns(test_doors_set_1, (0, -2)) == [(0, -4), (0, 0), (2, -2), (-2, -2)]
 
 test_doors_set_2 = recreate_doors('^ESSWWN(E|NNENN(EESS(WNSE|)SSS|WWWSSSSE(SW|NNNE)))$')
-assert find_the_longest_path(test_doors_set_2) == 23
+assert find_the_longest_path(calculate_paths_for_all_rooms(test_doors_set_2)) == 23
 
 test_doors_set_3 = recreate_doors('^WSSEESWWWNW(S|NENNEEEENN(ESSSSW(NWSW|SSEN)|WSWWN(E|WWS(E|SS))))$')
-assert find_the_longest_path(test_doors_set_3) == 31
-
+assert find_the_longest_path(calculate_paths_for_all_rooms(test_doors_set_3)) == 31
 
 # The input taken from https://adventofcode.com/2018/day/20/input
 input = '<input>'
+input_calculate_paths = calculate_paths_for_all_rooms(recreate_doors(input))
 
-print("Solution for first part:", find_the_longest_path(recreate_doors(input)))
+print("Solution for first part:", find_the_longest_path(input_calculate_paths))
+print("Solution for second part:", calculate_rooms_with_path_atleast_1000(input_calculate_paths))
