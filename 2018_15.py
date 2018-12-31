@@ -1,10 +1,14 @@
 from queue import Queue
 from functools import cmp_to_key
+from copy import deepcopy
 
+
+TESTING = False
 
 X, Y = 0, 1
 START_UNIT_HEALTH = 200
 START_UNIT_ATTACK_POWER = 3
+ELVE, GOBLIN = 'E', 'G'
 
 
 def parse_lines(input: [str]):
@@ -129,9 +133,10 @@ def find_occupied(walls, creatures):
 def round(walls: set, creatures: [Creature]):
     creatures.sort()
     for creature in creatures:
-        occupied = find_occupied(walls, creatures)
         if not creature.is_alive():
             continue
+
+        occupied = find_occupied(walls, creatures)
 
         all_targests = [c for c in creatures if c.is_alive() and not c.is_same_race(creature)]
         if not all_targests:  # All enemies are death
@@ -141,30 +146,39 @@ def round(walls: set, creatures: [Creature]):
         the_enemy_to_attacked = find_the_enemy_to_attacked(all_targests, creature.position)
         if not the_enemy_to_attacked:
             creature.position = find_the_next_step_position(occupied, all_targests, creature.position)
-            occupied = find_occupied(walls, creatures)
+            the_enemy_to_attacked = find_the_enemy_to_attacked(all_targests, creature.position)
 
         # Attack
-        the_enemy_to_attacked = find_the_enemy_to_attacked(all_targests, creature.position)
         if the_enemy_to_attacked:
             the_enemy_to_attacked.recive_damage(creature)
 
     return False
 
 
-def simulation(input: [str]):
-    creatures, walls = analise_tokens(parse_lines(input))
+def simulation(creatures, walls, extra_exit=None, verbose=False):
     round_count = 0
 
     while True:
         is_end = round(walls, creatures)
 
-        #print(round_count + 1)
-        #visualisation(walls, creatures)
+        if verbose:
+            print(round_count + 1)
+            visualisation(walls, creatures)
 
-        if is_end:
-            return sum([c.health for c in creatures if c.is_alive()]) * round_count
+        if (extra_exit and extra_exit(creatures)) or is_end:
+            return round_count, creatures
         else:
             round_count += 1
+
+
+def run_simulation(input: [str], verbose=False):
+    return simulation(*analise_tokens(parse_lines(input)), verbose=verbose)
+
+
+def run_first_part_simulation(input: str, verbose=False):
+    round_count, creatures = run_simulation(input.splitlines(), verbose=verbose)
+    living = [c.health for c in creatures if c.is_alive()]
+    return sum(living) * round_count
 
 
 def visualisation(walls: set, creatures: []):
@@ -200,12 +214,64 @@ def visualisation(walls: set, creatures: []):
         print('\n', end='')
 
 
-def simulation_test(input, excepted):
-    result = simulation(input.splitlines())
-    assert result == excepted, f"Excepted: {excepted}, recived: {result}"
+def find_the_first_good(input, verbose=False):
+    '''This method originaly use bisect algorithm, but for my input, you can't use it
+
+        Testing: 4 -> result: 109894 all elves survive: False
+        Testing: 5 -> result: 106352 all elves survive: False
+        Testing: 6 -> result: 102879 all elves survive: False
+        Testing: 7 -> result: 100924 all elves survive: False
+        Testing: 8 -> result: 96370 all elves survive: False
+        Testing: 9 -> result: 93794 all elves survive: False
+        Testing: 10 -> result: 91080 all elves survive: False
+        Testing: 11 -> result: 88464 all elves survive: False
+        Testing: 12 -> result: 84240 all elves survive: False
+        Testing: 13 -> result: 82782 all elves survive: False
+        Testing: 14 -> result: 77224 all elves survive: False
+        Testing: 15 -> result: 65000 all elves survive: False
+        Testing: 16 -> result: 62468 all elves survive: True
+        Testing: 17 -> result: 66384 all elves survive: False
+        Testing: 18 -> result: 65904 all elves survive: False
+        Testing: 19 -> result: 59052 all elves survive: True
+        Testing: 20 -> result: 65164 all elves survive: True    
+    '''
+
+    def check_if_elve_died(creatures):
+        return len([c for c in creatures if c.race == ELVE and not c.is_alive()]) > 0
+
+    def test_of_attack_power(initial_creatures, initial_walls, new_attack_power):
+        for creature in initial_creatures:
+            if creature.race == ELVE:
+                creature.attact_power = new_attack_power
+
+        round_count, end_creatures = simulation(initial_creatures, initial_walls, extra_exit=check_if_elve_died)
+        living = [c for c in end_creatures if c.is_alive()]
+        result = len([c for c in end_creatures if not c.is_alive() and c.race == ELVE])
+
+        return result == 0, sum([l.health for l in living]) * round_count
+
+    creatures, walls = analise_tokens(parse_lines(input.splitlines()))
+    new_attack_power = 4
+    while True:
+        elves_win, result = test_of_attack_power(deepcopy(creatures), walls, new_attack_power)
+
+        if verbose:
+            print(f"Testing: {new_attack_power} -> result: {result} all elves survive: {elves_win}")
+
+        if elves_win:
+            return result
+        else:
+            new_attack_power += 1
 
 
-test_input_1 = '''#######
+if TESTING:
+
+    def run_first_part_simulation_test(input, excepted):
+        result = run_first_part_simulation(input)
+        assert result == excepted, f"Excepted: {excepted}, recived: {result}"
+
+
+    test_input_1 = '''#######
 #...#.#
 #.#G..#
 #..##.#
@@ -213,30 +279,30 @@ test_input_1 = '''#######
 #...#E#
 #######'''.splitlines()
 
-test_input_2 = '''#######
+    test_input_2 = '''#######
 #.E...#
 #.....#
 #...G.#
 #######'''.splitlines()
 
-assert neighbors_not_occupied_positions((1, 1), [(0, 1), (1, 0), (2, 1), (1, 2)]) == []
-assert neighbors_not_occupied_positions((1, 1), [(0, 1), (1, 0), (2, 1)]) == [(1, 2)]
-assert len(neighbors_not_occupied_positions((1, 1), [])) == 4
+    assert neighbors_not_occupied_positions((1, 1), [(0, 1), (1, 0), (2, 1), (1, 2)]) == []
+    assert neighbors_not_occupied_positions((1, 1), [(0, 1), (1, 0), (2, 1)]) == [(1, 2)]
+    assert len(neighbors_not_occupied_positions((1, 1), [])) == 4
 
-test_creatures_1, test_walls_1 = analise_tokens(parse_lines(test_input_1))
-test_occupied_1 = find_occupied(test_walls_1, test_creatures_1)
+    test_creatures_1, test_walls_1 = analise_tokens(parse_lines(test_input_1))
+    test_occupied_1 = find_occupied(test_walls_1, test_creatures_1)
 
-assert find_the_next_step_position(test_occupied_1, [test_creatures_1[0]], (5, 5)) == (5, 4)
-assert find_the_next_step_position(test_occupied_1, [test_creatures_1[0]], (5, 4)) == (5, 3)
-assert find_the_next_step_position(test_occupied_1, [test_creatures_1[0]], (5, 3)) == (5, 2)
-assert find_the_next_step_position(test_occupied_1, [test_creatures_1[0]], (5, 2)) == (4, 2)
+    assert find_the_next_step_position(test_occupied_1, [test_creatures_1[0]], (5, 5)) == (5, 4)
+    assert find_the_next_step_position(test_occupied_1, [test_creatures_1[0]], (5, 4)) == (5, 3)
+    assert find_the_next_step_position(test_occupied_1, [test_creatures_1[0]], (5, 3)) == (5, 2)
+    assert find_the_next_step_position(test_occupied_1, [test_creatures_1[0]], (5, 2)) == (4, 2)
 
-test_creatures_2, test_walls_2 = analise_tokens(parse_lines(test_input_2))
-test_occupied_2 = find_occupied(test_walls_2, test_creatures_2)
+    test_creatures_2, test_walls_2 = analise_tokens(parse_lines(test_input_2))
+    test_occupied_2 = find_occupied(test_walls_2, test_creatures_2)
 
-assert find_the_next_step_position(test_occupied_2, [test_creatures_2[1]], (2, 1)) == (3, 1)
+    assert find_the_next_step_position(test_occupied_2, [test_creatures_2[1]], (2, 1)) == (3, 1)
 
-simulation_test('''#########
+    run_first_part_simulation_test('''#########
 #G..G..G#
 #.......#
 #.......#
@@ -246,7 +312,7 @@ simulation_test('''#########
 #G..G..G#
 #########''', 27828)
 
-simulation_test('''#######
+    run_first_part_simulation_test('''#######
 #.G...#
 #...EG#
 #.#.#G#
@@ -254,7 +320,7 @@ simulation_test('''#######
 #.....#
 #######''', 27730)
 
-simulation_test('''#######
+    run_first_part_simulation_test('''#######
 #G..#E#
 #E#E.E#
 #G.##.#
@@ -262,7 +328,7 @@ simulation_test('''#######
 #...E.#
 #######''', 36334)
 
-simulation_test('''#######
+    run_first_part_simulation_test('''#######
 #E..EG#
 #.#G.E#
 #E.##E#
@@ -270,7 +336,7 @@ simulation_test('''#######
 #..E#.#
 #######''', 39514)
 
-simulation_test('''#######
+    run_first_part_simulation_test('''#######
 #E.G#.#
 #.#G..#
 #G.#.G#
@@ -278,7 +344,7 @@ simulation_test('''#######
 #...E.#
 #######''', 27755)
 
-simulation_test('''#######
+    run_first_part_simulation_test('''#######
 #.E...#
 #.#..G#
 #.###.#
@@ -286,7 +352,7 @@ simulation_test('''#######
 #...#G#
 #######''', 28944)
 
-simulation_test('''#########
+    run_first_part_simulation_test('''#########
 #G......#
 #.E.#...#
 #..##..G#
@@ -296,8 +362,57 @@ simulation_test('''#########
 #.....G.#
 #########''', 18740)
 
-# The input taken from: https://adventofcode.com/2018/day/15/input
-task_input = '''<input>'''.splitlines()
 
-result = simulation(task_input)
-print("Solution for first part:", result)
+    def find_the_first_good_test(input, excepted_result, excepted_attack_power):
+        actual = find_the_first_good(input)
+        assert actual == excepted_result, f'Result excepted: {excepted_result}, recived: {actual}'
+
+
+    find_the_first_good_test('''#######
+#.G...#
+#...EG#
+#.#.#G#
+#..G#E#
+#.....#
+#######''', 4988, 15)
+
+    find_the_first_good_test('''#######
+#E..EG#
+#.#G.E#
+#E.##E#
+#G..#.#
+#..E#.#
+#######''', 31284, 4)
+
+    find_the_first_good_test('''#######
+#E.G#.#
+#.#G..#
+#G.#.G#
+#G..#.#
+#...E.#
+#######''', 3478, 15)
+
+    find_the_first_good_test('''#######
+#.E...#
+#.#..G#
+#.###.#
+#E#G#G#
+#...#G#
+#######''', 6474, 12)
+
+    find_the_first_good_test('''#########
+#G......#
+#.E.#...#
+#..##..G#
+#...##..#
+#...#...#
+#.G...G.#
+#.....G.#
+#########''', 1140, 34)
+
+else:
+    # The input taken from: https://adventofcode.com/2018/day/15/input
+    task_input = '''<input>'''
+
+    print("Solution for the first part:", run_first_part_simulation(task_input))
+    print("Solution for the second part:", find_the_first_good(task_input))
