@@ -1,7 +1,5 @@
-from array import array
-
-
 GRID_SIZE = 300
+TESTING = False
 
 
 def cell_power(x: int, y: int, grid_serial_number: int):
@@ -12,178 +10,76 @@ def cell_power(x: int, y: int, grid_serial_number: int):
 
 
 def build_grid(grid_serial_number: int):
-    return [cell_power(x, y, grid_serial_number) for y in range(GRID_SIZE) for x in range(GRID_SIZE)]
+
+    def build_cell_power_grid(grid_serial_number):
+        return {
+            (x,y):cell_power(x, y, grid_serial_number)
+            for y in range(GRID_SIZE)
+            for x in range(GRID_SIZE)
+        }
+
+    grid = build_cell_power_grid(grid_serial_number)
+
+    for y in range(GRID_SIZE):
+        for x in range(GRID_SIZE):
+            grid[(x,y)] = grid[(x,y)] + grid.get((x, y - 1), 0) + grid.get((x - 1, y), 0) - grid.get((x - 1, y - 1), 0)
+
+    return grid
 
 
-def grid_sum_for_size(grid: [int], size = 3):
-    return [
-        sum([grid[GRID_SIZE*(y + iy) + (x + ix)] for iy in range(size) for ix in range(size)])
-        for x in range(0, GRID_SIZE - size)
+def grid_sum_for_size(sum_table: [int], size = 3):
+    def calculate_sum(x, y, size):
+        return sum_table[(x + size - 1, y + size - 1)] \
+            + sum_table.get((x - 1, y - 1), 0) \
+            - sum_table.get((x - 1, y + size - 1), 0) \
+            - sum_table.get((x + size - 1, y - 1), 0)
+
+    return {
+        (x, y): calculate_sum(x, y, size)
         for y in range(0, GRID_SIZE - size)
-    ]
+        for x in range(0, GRID_SIZE - size)
+    }
 
 
-def grid_to_string(grid: [int], size = GRID_SIZE) -> str:
-    result = ''
-    for y in range(size):
-        for x in range(size):
-            tmp = grid[size*y + x]
-            result += str(tmp).zfill(3)
-            result += ' '
-        result += '\n'
-
-    return result
-
-
-def index_to_2d_coordinates(index: int, grid_size: int):
-    return  (index % grid_size), int(index / grid_size)
-
-
-def find_coordinate_of_the_biggest_for_size(grid: [int], size = 3):
-    grid_size = GRID_SIZE - size
+def find_maximum_for_size(grid: {tuple:int}, size = 3):
     power_level_grid = grid_sum_for_size(grid, size)
-
-    maximum = max(power_level_grid)
-    index_of_maxium = power_level_grid.index(maximum)
-
-    return index_to_2d_coordinates(index_of_maxium, grid_size)
+    maximum = max(power_level_grid, key=power_level_grid.get)
+    return maximum, power_level_grid[maximum]
 
 
-assert cell_power(3, 5, 8) == 4
-assert cell_power(122, 79, 57) == -5
-assert cell_power(217, 196, 39) == 0
-assert cell_power(101, 153, 71) == 4
-
-test_18_grid = build_grid(18)
-test_42_grid = build_grid(42)
-assert len(grid_sum_for_size(test_18_grid, 3)) == 297 ** 2
-
-assert index_to_2d_coordinates(23 * GRID_SIZE + 2, GRID_SIZE) == (2, 23)
-assert index_to_2d_coordinates(45 * GRID_SIZE + 12, GRID_SIZE) == (12, 45)
-
-assert find_coordinate_of_the_biggest_for_size(test_18_grid) == (45, 33)
-assert find_coordinate_of_the_biggest_for_size(test_42_grid) == (61, 21)
-
-first_part_solution = find_coordinate_of_the_biggest_for_size(build_grid(8561))
-print(f"Solution for first part: {first_part_solution[1]},{first_part_solution[0]}")
+def find_coordinate_of_the_biggest_for_size(grid: {tuple:int}):
+    return find_maximum_for_size(grid, 3)[0]
 
 
-def increase_sum_grid(original_grid: [int],
-                      actual_grid: [int],
-                      actual_sum_square_size: int,
-                      grid_size: int = GRID_SIZE):
-    working_grid_size = grid_size - actual_sum_square_size
-    maximum = 0
-    maximum_position = None
+def find_the_coordinate_and_the_sum_grid_size(grid: {tuple:int}):
+    results = {size:find_maximum_for_size(grid, size) for size in range(1, 300)}
+    best_size = max(results, key=lambda x:results[x][1])
 
-    for x in range(working_grid_size):
-        for y in range(working_grid_size):
-            new_value = actual_grid[grid_size * y + x] \
-            + sum([original_grid[grid_size * (y + actual_sum_square_size) + x + i] for i in range(actual_sum_square_size)]) \
-            + sum([original_grid[grid_size * (y + i) + (x + actual_sum_square_size)] for i in range(actual_sum_square_size)]) \
-            + original_grid[grid_size * (y + actual_sum_square_size) + x + actual_sum_square_size]
-
-            if new_value > maximum:
-                maximum = new_value
-                maximum_position = (x, y)
-                
-
-            actual_grid[grid_size * y + x] = new_value
-
-    return maximum, maximum_position, actual_grid
-
-test = [
-    1,2,
-    3,4]
-
-assert increase_sum_grid(test, test[:], 1, 2) == (10, (0, 0), [10, 2, 3, 4])
-
-test = [
-    1, 2, 3,
-    4, 5, 6,
-    7, 8, 9]
-
-assert increase_sum_grid(test, test[:], 1, 3) == (28, (1, 1), [
-    12, 16, 3,
-    24, 28, 6,
-    7, 8, 9])
-
-test = [
-    1, 0, 2,
-    0, 0, 3,
-    4, 5, 6]
-
-assert increase_sum_grid(test, test[:], 1, 3) == (14, (1, 1), [
-    1, 5, 2,
-    9, 14, 3,
-    4, 5, 6])
-
-test = [
-    1, 0, 2,
-    0, 0, 3,
-    4, 5, 6]
-
-assert increase_sum_grid(test, test[:], 2, 3) == (21, (0, 0), [
-    21, 0, 2,
-    0, 0, 3,
-    4, 5, 6])
-
-test = [
-    0, 0, 0, 1,
-    0, 0, 0, 1,
-    0, 0, 0, 1,
-    0, 0, 0, 1]
-
-assert increase_sum_grid(test, test[:], 2, 4) == (3, (1, 0), [
-    0, 3, 0, 1,
-    0, 3, 0, 1,
-    0, 0, 0, 1,
-    0, 0, 0, 1])
-
-test = [
-    0, 0, 0, 1,
-    0, 0, 0, 1,
-    0, 0, 0, 1,
-    1, 1, 1, 1]
-
-assert increase_sum_grid(test, test[:], 2, 4) == (5, (1, 1), [
-    0, 3, 0, 1,
-    3, 5, 0, 1,
-    0, 0, 0, 1,
-    1, 1, 1, 1])
-
-test = [
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1]
-
-assert increase_sum_grid(test, test[:], 1, 4) == (4, (0, 0), [
-    4, 4, 4, 1,
-    4, 4, 4, 1,
-    4, 4, 4, 1,
-    1, 1, 1, 1])
+    return results[best_size][0], best_size
 
 
-def find_the_coordinate_and_the_sum_grid_size(entry_grid):
-    maximum = 0
-    maximum_point = None
-    maximum_size = None
-    actual_gird = array('i', entry_grid)
+if TESTING:
 
-    for size in range(1, 300):
-        local_maximum, local_maximum_position, actual_gird = increase_sum_grid(entry_grid, actual_gird, size)
+    assert cell_power(3, 5, 8) == 4
+    assert cell_power(122, 79, 57) == -5
+    assert cell_power(217, 196, 39) == 0
+    assert cell_power(101, 153, 71) == 4
 
-        if local_maximum > maximum:
-            maximum = local_maximum
-            maximum_point = local_maximum_position
-            maximum_size = size + 1
+    test_18_grid = build_grid(18)
+    test_42_grid = build_grid(42)
 
-    return maximum_point, maximum_size
+    assert find_coordinate_of_the_biggest_for_size(test_18_grid) == (33, 45)
+    assert find_coordinate_of_the_biggest_for_size(test_42_grid) == (21, 61)
 
+    assert find_the_coordinate_and_the_sum_grid_size(test_18_grid) == ((90, 269), 16)
+    assert find_the_coordinate_and_the_sum_grid_size(test_42_grid) == ((232, 251), 12)
 
-test_18_grid = build_grid(18)
-assert find_the_coordinate_and_the_sum_grid_size(test_18_grid) == ((90, 269), 16)
+else:
 
-maximum_point, size = find_the_coordinate_and_the_sum_grid_size(build_grid(8561))
-print(f"Solution for second part: {maximum_point[0]},{maximum_point[1]},{size}")
+    task_grid = build_grid(8561)
+
+    first_part_solution = find_coordinate_of_the_biggest_for_size(task_grid)
+    print(f"Solution for first part: {first_part_solution[0]},{first_part_solution[1]}")
+
+    maximum_point, size = find_the_coordinate_and_the_sum_grid_size(task_grid)
+    print(f"Solution for second part: {maximum_point[0]},{maximum_point[1]},{size}")
