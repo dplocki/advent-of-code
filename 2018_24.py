@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 
 
 TESTING = False
@@ -101,7 +102,11 @@ def translate_input_to_object(lines: [str]):
     return groups
 
 
-def simulation(input: [str], verbose=False):
+def count_units_in_groups(groups: [Group]) -> int:
+    return sum([g.units for g in groups])
+
+
+def simulation(groups: [Group], boost_for_immune_system=0, verbose=False):
 
 
     def count_teams(groups):
@@ -203,17 +208,67 @@ def simulation(input: [str], verbose=False):
         active_groups_for_team('Immune system:', IMMUNE_SYSTEM)
         active_groups_for_team('Infection:', INFECTION)
 
-
-    groups = translate_input_to_object(input)
+    old_watch_dog = count_units_in_groups(groups)
     while True:
         groups = [g for g in groups if g.is_in_play()]
 
         visualisation_turn_begin(groups)
         if count_teams(groups) == 1:
-            return sum([g.units for g in groups])
+            return groups
 
         attack_schedule = targeting_phase(groups)
         groups = attack_phase(groups, attack_schedule)
+
+        new_watch_dog = count_units_in_groups(groups)
+        if new_watch_dog == old_watch_dog:
+            return None
+        else:
+            old_watch_dog = new_watch_dog
+
+
+
+def first_part_solution(input: [str], verbose=False):
+    groups = translate_input_to_object(input)
+    winnig_groups = simulation(groups, verbose=verbose)
+    return count_units_in_groups(winnig_groups)
+
+
+def second_part_solution(input: [str], verbose=False):
+
+    def test(groups, boost):
+        for g in groups:
+            if g.team == IMMUNE_SYSTEM:
+                g.attack += boost
+
+        winnig_groups = simulation(groups, verbose=verbose)
+        if winnig_groups:
+            if verbose:
+                print("Testing boost =", boost, "result: ", winnig_groups[0].team == IMMUNE_SYSTEM)
+
+            return winnig_groups[0].team == IMMUNE_SYSTEM, sum([g.units for g in winnig_groups])
+        else:
+            if verbose:
+                print("Testing boost =", boost, "result: deadlock")
+
+            return False, None
+
+
+    original_groups = translate_input_to_object(input)
+    bad = 0
+    good = 10000
+    last_good_units_number = None
+
+    while bad + 1 != good:  # For some inputs its also bad solution, as in solution for AoC 2018#15, but works for mine, I like this binary search
+        local_boost = bad + ((good - bad) // 2)
+        test_result, units_number = test(deepcopy(original_groups), local_boost)
+        if test_result:
+            good = local_boost
+            last_good_units_number = units_number
+        else:
+            bad = local_boost
+
+    return last_good_units_number
+
 
 
 if TESTING:
@@ -226,7 +281,8 @@ Infection:
 801 units each with 4706 hit points (weak to radiation) with an attack that does 116 bludgeoning damage at initiative 1
 4485 units each with 2961 hit points (immune to radiation; weak to fire, cold) with an attack that does 12 slashing damage at initiative 4'''
 
-    assert simulation(test_lines.splitlines(), verbose=True) == 5216
+    assert first_part_solution(test_lines.splitlines(), verbose=False) == 5216
+    assert second_part_solution(test_lines.splitlines(), verbose=False) == 51
 
 else:
     def read_input_file(file_name) -> [int]:
@@ -235,4 +291,5 @@ else:
                 yield line.rstrip('\n')
 
     # The input taken from: https://adventofcode.com/2018/day/24/input
-    print("Solution for the first part:", simulation(read_input_file('input.24.txt'), verbose=False))
+    print("Solution for the first part:", first_part_solution(read_input_file('input.24.txt'), verbose=False))
+    print("Solution for the second part:", second_part_solution(read_input_file('input.24.txt'), verbose=False))
