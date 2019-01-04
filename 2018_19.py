@@ -6,6 +6,9 @@ def parse_input(input: [str]):
     pattern = re.compile(r'^([a-z]+) (\d+) (\d+) (\d+)$')
 
     for line in input:
+        if line.startswith('#'):
+            continue
+
         result = pattern.match(line)
         yield result[1], int(result[2]), int(result[3]), int(result[4])
 
@@ -31,7 +34,9 @@ def run_program(program: [str], instruction_pointer_register, registers = None, 
     return registers
 
 
-test_input = input_to_program('''seti 5 0 1
+if __name__ == '__main__':
+
+    test_input = input_to_program('''seti 5 0 1
 seti 6 0 2
 addi 0 1 0
 addr 1 2 3
@@ -39,13 +44,13 @@ setr 1 0 0
 seti 8 0 4
 seti 9 0 5'''.splitlines())
 
-assert run_program(test_input, 0) == [6, 5, 6, 0, 0, 9]
+    assert run_program(test_input, 0) == [6, 5, 6, 0, 0, 9]
 
-# The input taken from: https://adventofcode.com/2018/day/19/input (without first line)
-task_input = input_to_program('''<input>'''.splitlines())
+    # The input taken from: https://adventofcode.com/2018/day/19/input (without first line)
+    task_input = input_to_program('''<input>'''.splitlines())
 
-# Second parameter taken from first line of input (as number)
-print("Solution for first part:", run_program(task_input, 5)[0])
+    # Second parameter taken from first line of input (as number)
+    print("Solution for first part:", run_program(task_input, 5)[0])
 
-# to analyze output (kill after a while)
-run_program(task_input, 5, [1] + [0] * 5)[0]
+    # to analyze output (kill after a while)
+    run_program(task_input, 5, [1] + [0] * 5)[0]
