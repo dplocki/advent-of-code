@@ -105,7 +105,7 @@ def parse_program_file(file_name: str):
 def if_is_jump(index_register: int, instructions: []):
     tmp = opcodes[instructions[0]](instructions)
     if instructions[C] == index_register:
-        return tmp.replace(f'reg[{instructions[C]}] = ', 'jump_to ') + ' [+ 1]'
+        return tmp.replace(f'reg[{instructions[C]}] = ', 'jump_to ') 
 
     return tmp
 
@@ -123,7 +123,7 @@ def replace_reg_with_letters(result: str):
 
 
 def replace_index_with_line_number(index_register, line_number, result: str):
-    return result.replace(f'reg[{index_register}]', str(line_number - 1))
+    return result.replace(f'reg[{index_register}]', str(line_number))
 
 
 def translate_program(file_name: str):
@@ -142,12 +142,13 @@ def translate_program(file_name: str):
 
 
 #The input taken from: https://adventofcode.com/2018/day/21/input
-#translate_program('input.21.txt')
+translate_program('input.21.txt')
 
 _16 = __import__('2018_16')
 _19 = __import__('2018_19')
 
-def solution_first_part(program: [str]):
+
+def program_runner(program: [str]):
     instruction_pointer_register = 2
     registers = [0] * 6
     instruction_pointer = 0
@@ -157,13 +158,36 @@ def solution_first_part(program: [str]):
 
         registers[instruction_pointer_register] = instruction_pointer
         registers = _16.opcodes[instruction[0]](registers, instruction)
+
         if instruction_pointer == 28:
-            return registers[3]
+            yield registers[3]
 
         instruction_pointer = registers[instruction_pointer_register]
         instruction_pointer += 1
 
 
+def solution_first_part(program: [str]):
+    generator = program_runner(program)
+    return next(generator)
+
+
+#The input taken from: https://adventofcode.com/2018/day/21/input
 program = _19.input_to_program('''<input>'''.splitlines())
 
+
+def find_last_in_cycle(file_name) -> int:
+    been = set()
+    last = None
+
+    # I transcripe input to language which allow for goto, output of it (D register for every 28-th instruction) is input in this case
+    for line in open(file_name, 'r'):
+        tmp = int(line)
+        if tmp in been:
+            return last 
+
+        last = tmp
+        been.add(tmp)
+
+
 print('Solution for the first part:', solution_first_part(program))
+print('Solution for the second part:', find_last_in_cycle('result_of_c_program'))
