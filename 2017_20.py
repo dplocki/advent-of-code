@@ -1,7 +1,9 @@
 import re
+from copy import deepcopy
 
 
 TESTING = False
+SIM_LENGHT = 1000
 
 
 class Particle():
@@ -14,8 +16,8 @@ class Particle():
 
     def update(self):
         for i in range(3):
-            self.position[i] += self.speed[i]
             self.speed[i] += self.acceleration[i]
+            self.position[i] += self.speed[i]
 
     def distance_from_zero(self):
         return sum([abs(self.position[i]) for i in range(3)])
@@ -40,20 +42,43 @@ def parse_input(lines: [str]):
 
 
 def solution_for_first_part(particles: [Particle]):
-    for i in range(1000):
+    for i in range(SIM_LENGHT):
         for p in particles:
             p.update()
 
     return min(particles, key=lambda p: p.distance_from_zero()).index
 
 
+def solution_for_second_part(particles: [Particle]) -> int:
+    for _ in range(SIM_LENGHT):
+        positions = {}
+
+        for p in particles:
+            p.update()
+
+            key = tuple(p.position)
+            positions[key] = positions.get(key, 0) + 1
+
+        particles = [p for p in particles if positions[tuple(p.position)] == 1]
+
+    return len(particles)
+
+
 if TESTING:
 
-    test_input = '''p=<3,0,0>, v=<2,0,0>, a=<-1,0,0>
+    test_input_1 = '''p=<3,0,0>, v=<2,0,0>, a=<-1,0,0>
 p=<4,0,0>, v=<0,0,0>, a=<-2,0,0>'''.splitlines()
 
-    particles = [p for p in parse_input(test_input)]
-    assert solution_for_first_part(particles) == 0
+    test_particles_1 = [p for p in parse_input(test_input_1)]
+    assert solution_for_first_part(test_particles_1) == 0
+
+    test_input_2 = '''p=<-6,0,0>, v=<3,0,0>, a=<0,0,0>
+p=<-4,0,0>, v=<2,0,0>, a=<0,0,0>
+p=<-2,0,0>, v=<1,0,0>, a=<0,0,0>
+p=<3,0,0>, v=<-1,0,0>, a=<0,0,0>'''.splitlines()
+
+    test_particles_2 = [p for p in parse_input(test_input_2)]
+    assert solution_for_second_part(test_particles_2) == 1
 
 else:
 
@@ -64,4 +89,5 @@ else:
 
     # The input taken from: https://adventofcode.com/2017/day/20/input
     task_particles = [p for p in parse_input(file_to_input_list('input.20.txt'))]
-    print("Solution for the first part:", solution_for_first_part(task_particles))
+    print("Solution for the first part:", solution_for_first_part(deepcopy(task_particles)))
+    print("Solution for the second part:", solution_for_second_part(task_particles))
