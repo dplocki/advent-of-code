@@ -74,22 +74,33 @@ def generate_new_state(lines: [str], rules: {str: str}):
     return None
 
 
-def count_pixes_after_n_generations(n: int, rules: {str: str}):
-    starting_input = '''.#./..#/###'''.split('/')
-
+def after_n_generations(starting_input: [str], rules: {str: str}, n: int):
     current_state = starting_input
     for _ in range(n):
         current_state = generate_new_state(current_state, rules)
 
-    return sum([line.count('#') for line in current_state])
+    return current_state
 
+
+def count_pixes_for_generation(generation: [str]):
+    return sum([line.count('#') for line in generation])
+
+
+STARTING_INPUT = '''.#./..#/###'''.split('/')
 
 testing_input = '''../.# => ##./#../...
 .#./..#/### => #..#/..../..../#..#'''.splitlines()
 
 test_rules = parse_rules(testing_input)
-assert count_pixes_after_n_generations(2, test_rules) == 12
+test_generation_after_2 = after_n_generations(STARTING_INPUT, test_rules, 2)
+
+assert count_pixes_for_generation(test_generation_after_2) == 12
 
 # The input is taken from: https://adventofcode.com/2017/day/21/input 
-task_input = parse_rules(file_to_input_list('input.21.txt'))
-print("The solution for first part: ", count_pixes_after_n_generations(5, task_input))
+task_rules = parse_rules(file_to_input_list('input.21.txt'))
+task_generation_after_5 = after_n_generations(STARTING_INPUT, task_rules, 5)
+
+print("The solution for first part: ", count_pixes_for_generation(task_generation_after_5))
+
+task_generation_after_18 = after_n_generations(task_generation_after_5, task_rules, 18 - 5)
+print("The solution for second part: ", count_pixes_for_generation(task_generation_after_18))
