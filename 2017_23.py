@@ -68,3 +68,38 @@ def run_program(input_program: [str]):
 
 
 print('Solution for the first part:', run_program(file_to_input_list('input.23.txt')))
+
+
+def transcibe_program(input_program: [str]):
+    program = [instruction_tuple for instruction_tuple in parse_input(input_program)]
+
+    index = 0
+    for name, x, y in program:
+        print('_' + str(index).zfill(2) + ': ', end='')
+
+        if name == 'set':
+            print(f'{x} = {y}')
+        elif name == 'sub':
+            print(f'{x} -= {y}')
+        elif name == 'mul':
+            print(f'{x} *= {y}')
+        elif name == 'jnz':
+            print(f'if ({x} != 0) goto :_{str(index + y).zfill(2)}')
+
+        index += 1
+
+# Translate input:
+# transcibe_program(file_to_input_list('input.23.txt'))
+
+# then analized and transfered into:
+b_start = 100000 + '<value_from_first_line_of_input>' * 100
+h = 0
+for b in range(b_start, b_start + 17000 + 1, 17):
+    for d in range(2, b):
+        if b % d == 0:
+            e = b // d
+            if e >= 2 and e < b:
+                h += 1
+            break
+
+print('Solution for the second part:', h)
