@@ -139,7 +139,6 @@ def checking_sample(registers_before, instruction, registers_after) -> int:
 def parse_input_file(file_name):
     with open(file_name, 'r') as content_file:
         content = content_file.read()
-        re.findall(r'Before: \[(\d), (\d), (\d), (\d)\]\n(\d+) (\d+) (\d+) (\d+)\nAfter:  \[(\d), (\d), (\d), (\d)\]', content,  re.MULTILINE)
 
         for match in re.finditer(r'Before: \[(\d), (\d), (\d), (\d)\]\n(\d+) (\d+) (\d+) (\d+)\nAfter:  \[(\d), (\d), (\d), (\d)\]', content,  re.MULTILINE):
             yield [int(match.group(i)) for i in range(1, 5)], [int(match.group(i)) for i in range(5, 9)], [int(match.group(i)) for i in range(9, 13)]
@@ -188,11 +187,22 @@ def translate_opt_codes(samples: []):
 
 def parse_program_file(file_name: str):
     pattern = re.compile(r'(\d+) (\d+) (\d+) (\d+)')
+    new_line_count = 0
+    program_part_of_file = False
 
-    with open(file_name) as file:
+    with open(file_name, 'r') as file:
         for line in file:
-            group = pattern.match(line.strip())
-            yield int(group[1]), int(group[2]), int(group[3]), int(group[4])
+            if program_part_of_file:
+                match = pattern.match(line.strip())
+                yield [int(match[i]) for i in range(1, 5)]
+            else:
+                if line == '\n':
+                    new_line_count += 1
+                else:
+                    new_line_count = 0
+
+                if new_line_count > 2:
+                    program_part_of_file = True
 
 
 def run_program(opt_codes_to_instruction, program: [str]):
@@ -203,13 +213,12 @@ def run_program(opt_codes_to_instruction, program: [str]):
 
     return registers
 
+
 if __name__ == "__main__":
     assert len(checking_sample([3, 2, 1, 1], [9, 2, 1, 2], [3, 2, 2, 1])) == 3
 
-    # Input taken from: https://adventofcode.com/2018/day/16/input (only first part)
-    print("Solution for first part:", how_many_samples_match_3_or_more(parse_input_file('input.first_part.txt')))
+    # Input taken from: https://adventofcode.com/2018/day/16/input
+    print("Solution for first part:", how_many_samples_match_3_or_more(parse_input_file('input.16.txt')))
 
-    # Input taken from: https://adventofcode.com/2018/day/16/input (only second part)
-    program = parse_program_file('input.second_part.txt')
-
-    print("Solution for second part:", run_program(translate_opt_codes(parse_input_file('input.first_part.txt')), program)[0])
+    program = parse_program_file('input.16.txt')
+    print("Solution for second part:", run_program(translate_opt_codes(parse_input_file('input.16.txt')), program)[0])
