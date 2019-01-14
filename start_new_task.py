@@ -15,7 +15,9 @@ def create_files(year: int, day: int):
 
     with open(os.path.join(str(year), f'{year}_{day_with_zero}.py'), 'w') as file:
         file.writelines(f'''
-        
+
+
+
 def load_input_file(file_name):
     with open(file_name) as file:
         for line in file:
@@ -28,11 +30,14 @@ load_input_file('{file_input_name}')
 
 
 
+
+
+# The solution is taken from: https://adventofcode.com/{year}/day/{day}/input
 # print("Solution for the first part:", )
 
 ''')
 
-    with open(os.path.join(str(year), file_input_name), 'w') as file:
+    with open(file_input_name, 'w') as file:
         file.writelines('')
 
 
