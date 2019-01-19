@@ -42,5 +42,24 @@ def solution_for_the_first_part(lines_providers) -> int:
     return len(result)
 
 
+def solution_for_the_second_part(lines_providers) -> int:
+    result = dict()
+    instruction = {
+        TURN_ON: (lambda a, p: 1),
+        TURN_OFF: (lambda a, p: -1 if a > 0 else 0),
+        TOGGLE: (lambda a, p: 2)
+    }
+
+    for code, start_x, start_y, end_x, end_y in parse_input(lines_providers):
+        for x in range(start_x, end_x + 1):
+            for y in range(start_y, end_y + 1):
+                p = 1000 * y + x
+                a = result.get(p, 0)
+                result[p] = a + instruction[code](a, p)
+
+    return sum(result.values())
+
+
 # The solution is taken from: https://adventofcode.com/2015/day/6/input
 print("Solution for the first part:", solution_for_the_first_part(load_input_file('input.06.txt')))
+print("Solution for the second part:", solution_for_the_second_part(load_input_file('input.06.txt')))
