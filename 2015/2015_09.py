@@ -1,11 +1,10 @@
-
 def load_input_file(file_name):
     with open(file_name) as file:
         for line in file:
             yield line.strip()
 
 
-def solution_for_the_part(lines_provider: [str]):
+def distance_path_generatator(lines_provider: [str]):
 
 
     def build_graph(lines_provider: [str]):
@@ -41,15 +40,29 @@ def solution_for_the_part(lines_provider: [str]):
 
 
     graph = build_graph(lines_provider)
+    for city in graph.keys():
+        for distance in generate_paths(graph, city, [city], 0):
+            yield distance
 
-    return min(distance for city in graph.keys() for distance in generate_paths(graph, city, [city], 0))
+
+def solution_for_the_first_part(lines_provider: [str]):
+    return min(distance_path_generatator(lines_provider))
+
+
+def solution_for_the_second_part(lines_provider: [str]):
+    return max(distance_path_generatator(lines_provider))
 
 
 test_input = '''London to Dublin = 464
 London to Belfast = 518
 Dublin to Belfast = 141'''
 
-assert solution_for_the_part(test_input.splitlines()) == 605
+assert solution_for_the_first_part(test_input.splitlines()) == 605
 
 # The solution is taken from: https://adventofcode.com/2015/day/9/input
-print("Solution for the first part:", solution_for_the_part(load_input_file('input.09.txt')))
+print("Solution for the first part:", solution_for_the_first_part(load_input_file('input.09.txt')))
+
+assert solution_for_the_second_part(test_input.splitlines()) == 982
+
+# The solution is taken from: https://adventofcode.com/2015/day/9/input
+print("Solution for the second part:", solution_for_the_second_part(load_input_file('input.09.txt')))
