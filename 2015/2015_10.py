@@ -22,12 +22,21 @@ def look_and_say(word: str):
 def generator_to_str(generator): return ''.join(generator)
 
 
-def solution_for_first_part(initial_word: str):
+def interation_generator(initial_word: str):
     word = initial_word
-    for _ in range(40):
+    i = 0
+    while True:
         word = generator_to_str(look_and_say(word))
+        i += 1
+        yield i, word
 
-    return len(word)
+
+def get_length_after_iteration(generator, require_iteration):
+    for i, word in generator:
+        if i < require_iteration:
+            continue
+
+        return len(word)
 
 
 assert generator_to_str(look_and_say('1')) == '11'
@@ -37,4 +46,7 @@ assert generator_to_str(look_and_say('1211')) == '111221'
 assert generator_to_str(look_and_say('111221')) == '312211'
 
 # The solution is taken from: https://adventofcode.com/2015/day/10/input
-print("Solution for the first part:", solution_for_first_part(load_input_file('input.10.txt')))
+look_and_say_generator = interation_generator(load_input_file('input.10.txt'))
+
+print("Solution for the first part:", get_length_after_iteration(look_and_say_generator, 40))
+print("Solution for the second part:", get_length_after_iteration(look_and_say_generator, 50))
