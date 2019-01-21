@@ -58,6 +58,7 @@ def solution_for_first_part(old_santa_password):
 
 
     def passwords_may_not_contain_the_letters_i_o_or_l(password):
+        # faster than regex:
         return 'i' not in password and 'o' not in password and 'l' not in password
 
 
@@ -82,4 +83,6 @@ def solution_for_first_part(old_santa_password):
 
 # The solution is taken from: https://adventofcode.com/2015/day/11/input
 old_santa_password = load_input_file('input.11.txt')
-print("Solution for the first part:", solution_for_first_part(old_santa_password))
+first_part_replay = solution_for_first_part(old_santa_password)
+print("Solution for the first part:", first_part_replay)
+print("Solution for the second part:", solution_for_first_part(first_part_replay))
