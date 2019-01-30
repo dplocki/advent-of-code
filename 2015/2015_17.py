@@ -10,27 +10,25 @@ def load_input_file(file_name):
             yield line.strip()
 
 
-def containers_combinations_generator(containers: list):
+def wanted_storativity_containers_combinations_generator(containers: list):
     containers_number = len(containers)
 
-    yield from (
-            sum(
-                containers[index]
-                for index in range(containers_number)
-                if product[index]
-            )
-            for product in itertools.product([True, False],  repeat=containers_number)
-        )
+    for combination in itertools.product([True, False], repeat=containers_number):
+        storativity = sum(containers[index] for index in range(containers_number) if combination[index])
+        if storativity == WANTED_SIZE:
+            yield combination
 
 
-def solution_for_first_part(containers):
-    return sum(
-            1
-            for storativity in containers_combinations_generator(containers)
-            if storativity == WANTED_SIZE
-        )
+def solution_for_second_part(combinations):
+    containers_in_combinations = [sum(1 for c in combination if c) for combination in combinations]
+    minimum_number = min(containers_in_combinations)
+
+    return sum(1 for c in containers_in_combinations if c == minimum_number)
 
 
 # The solution is taken from: https://adventofcode.com/2015/day/17/input
 containers = list(map(int, load_input_file('input.17.txt')))
-print("Solution for the first part:", solution_for_first_part(containers))
+all_combinations = list(wanted_storativity_containers_combinations_generator(containers))
+
+print("Solution for the first part:", len(all_combinations))
+print("Solution for the second part:", solution_for_second_part(all_combinations))
