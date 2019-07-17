@@ -87,7 +87,7 @@ David would gain 41 happiness units by sitting next to Carol.'''
 test_graph = build_grap(test_input.splitlines())
 assert solution_for_first_part(test_graph) == 330
 
-# The solution is taken from: https://adventofcode.com/2015/day/13/input
+# The input is taken from: https://adventofcode.com/2015/day/13/input
 graph = build_grap(load_input_file('input.13.txt'))
 
 print("Solution for the first part:", solution_for_first_part(graph))

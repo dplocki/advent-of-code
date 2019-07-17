@@ -71,7 +71,7 @@ def solution_for_second_part(first_generation: set):
     return run_state_100_time(first_generation, lights_corners)
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/18/input
+# The input is taken from: https://adventofcode.com/2015/day/18/input
 first_generation = input_into_state(load_input_file('input.18.txt'))
 print("Solution for the first part:", solution_for_first_part(first_generation))
 print("Solution for the second part:", solution_for_second_part(first_generation))

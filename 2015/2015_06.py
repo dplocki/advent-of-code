@@ -60,6 +60,6 @@ def solution_for_the_second_part(lines_providers) -> int:
     return sum(result.values())
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/6/input
+# The input is taken from: https://adventofcode.com/2015/day/6/input
 print("Solution for the first part:", solution_for_the_first_part(load_input_file('input.06.txt')))
 print("Solution for the second part:", solution_for_the_second_part(load_input_file('input.06.txt')))

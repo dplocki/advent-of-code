@@ -9,7 +9,7 @@ def load_input_file(file_name):
 
 pattern = re.compile(r'-?\d+')
 
-# The solution is taken from: https://adventofcode.com/2015/day/12/input
+# The input is taken from: https://adventofcode.com/2015/day/12/input
 json_data = load_input_file('input.12.txt')
 
 print("Solution for the first part:", sum(map(int, re.findall(pattern, json_data))))

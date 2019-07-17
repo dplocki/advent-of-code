@@ -59,10 +59,10 @@ Dublin to Belfast = 141'''
 
 assert solution_for_the_first_part(test_input.splitlines()) == 605
 
-# The solution is taken from: https://adventofcode.com/2015/day/9/input
+# The input is taken from: https://adventofcode.com/2015/day/9/input
 print("Solution for the first part:", solution_for_the_first_part(load_input_file('input.09.txt')))
 
 assert solution_for_the_second_part(test_input.splitlines()) == 982
 
-# The solution is taken from: https://adventofcode.com/2015/day/9/input
+# The input is taken from: https://adventofcode.com/2015/day/9/input
 print("Solution for the second part:", solution_for_the_second_part(load_input_file('input.09.txt')))

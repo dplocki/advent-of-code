@@ -15,7 +15,7 @@ def calculate_the_size_difference_after_unescape(lines: [str]):
         yield memory_size - not_memory_size
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/8/input
+# The input is taken from: https://adventofcode.com/2015/day/8/input
 print("Solution for the first part:", sum(calculate_the_size_difference_after_unescape(load_input_file('input.08.txt'))))
 
 
@@ -27,5 +27,5 @@ def calculate_the_size_difference_after_escape(lines: [str]):
         yield not_memory_size - memory_size
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/8/input
+# The input is taken from: https://adventofcode.com/2015/day/8/input
 print("Solution for the second part:", sum(calculate_the_size_difference_after_escape(load_input_file('input.08.txt'))))

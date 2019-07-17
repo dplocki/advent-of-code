@@ -84,6 +84,6 @@ def solution_for_second_part(lines: [str]):
         )
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/15/input
+# The input is taken from: https://adventofcode.com/2015/day/15/input
 print("Solution for the first part:", solution_for_first_part(load_input_file('input.15.txt')))
 print("Solution for the second part:", solution_for_second_part(load_input_file('input.15.txt')))

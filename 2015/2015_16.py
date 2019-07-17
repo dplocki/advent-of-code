@@ -66,6 +66,6 @@ def solution_for_second_part(lines: [str]):
             return parse_sue_name(sue_name)
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/16/input
+# The input is taken from: https://adventofcode.com/2015/day/16/input
 print("Solution for the first part:", solution_for_first_part(load_input_file('input.16.txt')))
 print("Solution for the second part:", solution_for_second_part(load_input_file('input.16.txt')))

@@ -52,7 +52,7 @@ def solution_for_the_second_part(output_directory: {}, result_of_first_part: int
     return find_value_of(output_directory['a'], output_directory)
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/7/input
+# The input is taken from: https://adventofcode.com/2015/day/7/input
 output_directory = build_output_directory(load_input_file('input.07.txt'))
 a_wire_value = solution_for_the_first_part(output_directory.copy())
 

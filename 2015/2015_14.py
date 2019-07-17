@@ -64,6 +64,6 @@ def solution_for_second_part(lines: [str]):
     return max(points.values())
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/14/input
+# The input is taken from: https://adventofcode.com/2015/day/14/input
 print("Solution for the first part:", solution_for_first_part(load_input_file('input.14.txt')))
 print("Solution for the second part:", solution_for_second_part(load_input_file('input.14.txt')))

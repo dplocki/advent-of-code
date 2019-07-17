@@ -55,7 +55,7 @@ def solution_for_the_second_part(rules, molecule):
     return tokens_count - brackets - 2 * comas - 1
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/19/input
+# The input is taken from: https://adventofcode.com/2015/day/19/input
 rules, molecule = parse_input(load_input_file('input.19.txt'))
 print("Solution for the first part:", solution_for_the_first_part(rules, molecule))
 print("Solution for the second part:", solution_for_the_second_part(rules, molecule))

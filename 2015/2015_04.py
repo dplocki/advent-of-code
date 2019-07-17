@@ -52,7 +52,7 @@ def find_the_lowest_index(key: str, how_many_zeros_on_begin: int):
     return result
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/4/input
+# The input is taken from: https://adventofcode.com/2015/day/4/input
 key = load_input_file('input.04.txt')
 
 print("Solution for the first part:", find_the_lowest_index(key, 5))

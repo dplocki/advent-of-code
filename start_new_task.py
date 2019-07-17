@@ -20,8 +20,7 @@ def create_files(year: int, day: int):
 
 def load_input_file(file_name):
     with open(file_name) as file:
-        for line in file:
-            yield line.strip()
+        yield from (line.strip() for line in file)
 
 
 
@@ -32,7 +31,7 @@ load_input_file('{file_input_name}')
 
 
 
-# The solution is taken from: https://adventofcode.com/{year}/day/{day}/input
+# The input is taken from: https://adventofcode.com/{year}/day/{day}/input
 # print("Solution for the first part:", )
 
 ''')

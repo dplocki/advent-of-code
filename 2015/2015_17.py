@@ -26,7 +26,7 @@ def solution_for_second_part(combinations):
     return sum(1 for c in containers_in_combinations if c == minimum_number)
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/17/input
+# The input is taken from: https://adventofcode.com/2015/day/17/input
 containers = list(map(int, load_input_file('input.17.txt')))
 all_combinations = list(wanted_storativity_containers_combinations_generator(containers))
 

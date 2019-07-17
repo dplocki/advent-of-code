@@ -81,7 +81,7 @@ def solution_for_first_part(old_santa_password):
         return new_password
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/11/input
+# The input is taken from: https://adventofcode.com/2015/day/11/input
 old_santa_password = load_input_file('input.11.txt')
 first_part_replay = solution_for_first_part(old_santa_password)
 print("Solution for the first part:", first_part_replay)

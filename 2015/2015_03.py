@@ -44,7 +44,7 @@ def solution_to_the_second_part(coordinates: str):
     return len(houses)
 
 
-# The solution is taken from: https://adventofcode.com/2015/day/3/input
+# The input is taken from: https://adventofcode.com/2015/day/3/input
 task_input = load_input_file('input.03.txt')
 print("Solution for the first part:", solution_to_the_first_part(task_input))
 print("Solution for the second part:", solution_to_the_second_part(task_input))

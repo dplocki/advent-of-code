@@ -73,4 +73,5 @@ assert is_nice_second_part('xxyxx') == True
 assert is_nice_second_part('uurcxstgmygtbstg') == False
 assert is_nice_second_part('ieodomkazucvgmuy') == False
 
+# The input taken from: https://adventofcode.com/2015/day/5/input
 print("Solution for the second part:", sum(1 for line in load_input_file('input.05.txt') if is_nice_second_part(line)))
