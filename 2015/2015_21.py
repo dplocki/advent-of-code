@@ -90,12 +90,12 @@ def items_sets_generator():
                 yield build_set(weapon, armor, ring_a, ring_b)
 
 
-def only_prices_of_winning_sets(items_sets_generator: [], boss: Fighter) -> []:
+def only_prices_of_items_sets_with_result(items_sets_generator: [], boss: Fighter, result) -> []:
     for items_set in items_sets_generator:
         player = Fighter(name='player', hit_points = 100, damage=items_set[1], armor=items_set[2])
         tmp_boss = copy.copy(boss)
 
-        if check_if_player_wins(player, tmp_boss):
+        if check_if_player_wins(player, tmp_boss) == result:
             yield items_set[0]
 
 
@@ -104,4 +104,8 @@ test_boss = Fighter('boss', hit_points=12, damage=7, armor=2)
 assert check_if_player_wins(test_player, test_boss) == True
 
 # The input is taken from: https://adventofcode.com/2015/day/21/input
-print("Solution for the first part:", min(only_prices_of_winning_sets(items_sets_generator(), parse_input_to_fighter_class(load_input_file('input.21.txt')))))
+boss = parse_input_to_fighter_class(load_input_file('input.21.txt'))
+all_items_sets = list(items_sets_generator())
+
+print("Solution for the first part:", min(only_prices_of_items_sets_with_result(all_items_sets, boss, True)))
+print("Solution for the second part:", max(only_prices_of_items_sets_with_result(all_items_sets, boss, False)))
