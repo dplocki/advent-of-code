@@ -51,8 +51,14 @@ def solution_for_first_part(program: [str]) -> int:
 	return registers['b']
 
 
+def solution_for_second_part(program: [str]) -> int:
+	registers = run_program_return_registers_after(program, {'a': 1, 'b': 0})
+
+	return registers['b']
+
+
 # The input is taken from: https://adventofcode.com/2015/day/23/input
 program = list(parsing(load_input_file('input.23.txt')))
 
 print("Solution for the first part:", solution_for_first_part(program))
-
+print("Solution for the second part:", solution_for_second_part(program))
