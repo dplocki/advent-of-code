@@ -37,6 +37,8 @@ class State():
         self.effect_poison_timer = 0
         self.effect_recharge_timer = 0
 
+        self.difficulty_level_adjustment = 0
+
     def avaiable_spells(self):
         if self.player_mana >= MAGIC_MISSLE_COST:
             yield MAGIC_MISSLE
@@ -106,6 +108,7 @@ class State():
 
     def get_neighborns_states(self):
         # Player turn
+        self.player_hit_points -= self.difficulty_level_adjustment
         self.timer_spell_effect()
         for spell in self.avaiable_spells():
             neighborn = copy.copy(self)
@@ -157,6 +160,14 @@ def solution_for_first_part(state: State) -> int:
     return None
 
 
+def solution_for_second_part(state: State) -> int:
+    state.difficulty_level_adjustment = 1
+    return solution_for_first_part(state)
+
+
 # The input is taken from: https://adventofcode.com/2015/day/22/input
-boss = parse_input_to_fighter_class(load_input_file('input.22.txt'))
-print("Solution for the first part:", solution_for_first_part(boss))
+inital_state = parse_input_to_fighter_class(load_input_file('input.22.txt'))
+inital_state_hard = copy.copy(inital_state)
+
+print("Solution for the first part:", solution_for_first_part(inital_state))
+print("Solution for the second part:", solution_for_second_part(inital_state))
