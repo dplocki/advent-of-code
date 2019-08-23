@@ -3,10 +3,10 @@ from datetime import date
 import webbrowser
 
 
-def create_dictionary(year):
-    year = str(today.year)
-    if not os.path.exists(year):
-        os.mkdir(year)
+def create_dictionary(year: int):
+    year_as_string = str(year)
+    if not os.path.exists(year_as_string):
+        os.mkdir(year_as_string)
 
 
 def create_files(year: int, day: int):
