@@ -1,6 +1,3 @@
-import operator
-
-
 MESSAGE_LENGTH = 8
 
 
@@ -24,9 +21,20 @@ def get_the_most_common_letter(position_occurent: [dict]):
         yield max(position_occurent, key=position_occurent.get)
 
 
+def get_the_least_common_letter(position_occurent: [dict]):
+    for position_occurent in position_occurent:
+        yield min(position_occurent, key=position_occurent.get)
+
+
 def solution_for_first_part(input: [str]) -> str:
     return ''.join(get_the_most_common_letter(calculate_the_letter_occurents(input)))
 
 
+def solution_for_second_part(input: [str]) -> str:
+    return ''.join(get_the_least_common_letter(calculate_the_letter_occurents(input)))
+
+
 # The input is taken from: https://adventofcode.com/2016/day/6/input
-print("Solution for the first part:", solution_for_first_part(load_input_file('input.06.txt')))
+input = list(load_input_file('input.06.txt'))
+print("Solution for the first part:", solution_for_first_part(input))
+print("Solution for the second part:", solution_for_second_part(input))
