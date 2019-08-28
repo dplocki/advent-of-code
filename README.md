@@ -1,8 +1,8 @@
-# Advent of code
+# Advent of Code
 
-The solutions for [Advent of Code](https://adventofcode.com/).
-Written in Python.
+My solutions for [Advent of Code](https://adventofcode.com/) problems.
+Written in [Python 3](https://www.python.org/).
 
-# Licence
+## Licence
 
 [GNU General Public License](LICENSE)
