@@ -11,6 +11,10 @@ def load_input_file(file_name: str):
 def screen_update(screen_tall: int, screen_wide: int, input_lines: [str]):
 
 
+    def flat_coordinates(x, y):
+        return y * screen_wide + x
+
+
     def parse_input_line(line):
         if 'rect' in line:
             tmp = line.split(' ')[1].split('x')
@@ -18,10 +22,6 @@ def screen_update(screen_tall: int, screen_wide: int, input_lines: [str]):
 
         tmp = line.split('=')[1].split(' by ')
         return ROW_COMMAND if 'row' in line else COLUMN_COMMAND, int(tmp[0]), int(tmp[1])
-
-
-    def flat_coordinates(x, y):
-        return y * screen_wide + x
 
 
     screen = set()
@@ -54,14 +54,19 @@ def screen_update(screen_tall: int, screen_wide: int, input_lines: [str]):
         yield screen
 
 
-def solution_for_first_part(input_lines: [str]) -> int:
+def screen_state_after(input_lines: [str]):
     SCREEN_TALL = 6
     SCREEN_WIDE = 50
 
     for screen in screen_update(SCREEN_TALL, SCREEN_WIDE, input_lines):
         pass
 
+    return screen, SCREEN_WIDE, SCREEN_TALL
+
+
+def solution_for_first_part(screen: set) -> int:
     return len(screen)
+
 
 test_screen_tall = 3
 test_screen_wide = 7
@@ -72,6 +77,21 @@ test_input = [
     'rotate column x=1 by 1'
 ]
 
+
+def display_screen(screen: set, wide: int, tall: int) -> str:
+    return '\n'.join([
+        ''.join(
+            map(
+                lambda is_present: '#' if is_present else ' ',
+                [y * wide + x in screen for x in range(wide)]
+            )
+        )
+        for y in range(tall)
+    ])
+
+
 # The input is taken from: https://adventofcode.com/2016/day/8/input
-input_lines = load_input_file('input.08.txt')
-print("Solution for the first part:", solution_for_first_part(input_lines))
+screen_state = screen_state_after(load_input_file('input.08.txt'))
+print("Solution for the first part:", solution_for_first_part(screen_state[0]))
+print("Solution for the second part:")
+print(display_screen(*screen_state))
