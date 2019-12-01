@@ -16,25 +16,27 @@ def parse_input(input: [str]):
                 as_number_if_number(tokens[2]) if len(tokens) > 2 else None
             )
 
-def value_or_registry(registries, value):
-    return registries[value] if value in registries.keys() else value
-
-def cpy(registries, x, y):
-    registries[y] = value_or_registry(registries, x)
-    return None
-
-def inc(registries, x, y):
-    registries[x] += 1
-    return None
-
-def dec(registries, x, y):
-    registries[x] -= 1
-    return None
-
-def jnz(registries, x, y):
-    return y if value_or_registry(registries, x) != 0 else None
-
 def cpu(program, registries):
+
+    def value_or_registry(registries, value):
+        return registries[value] if value in registries.keys() else value
+
+    def cpy(registries, x, y):
+        registries[y] = value_or_registry(registries, x)
+        return None
+
+    def inc(registries, x, y):
+        registries[x] += 1
+        return None
+
+    def dec(registries, x, y):
+        registries[x] -= 1
+        return None
+
+    def jnz(registries, x, y):
+        return y if value_or_registry(registries, x) != 0 else None
+
+
     INSTRUCTIONS = {
         'cpy': cpy,
         'inc': inc,
@@ -51,12 +53,26 @@ def cpu(program, registries):
     return registries
 
 
+def build_registers():
+    return { l: 0 for l in 'abcd' }
+
 
 def solution_for_first_part(program):
-    registries = cpu(program, { l: 0 for l in 'abcd' })
+    registries = cpu(program, build_registers())
     return registries['a']
 
 
 # The input is taken from: https://adventofcode.com/2016/day/12/input
 program = [instruction for instruction in parse_input(load_input_file('input.12.txt'))]
 print("Solution for the first part:", solution_for_first_part(program))
+
+
+def solution_for_second_part(program):
+    registries = build_registers()
+    registries['c'] = 1
+
+    result = cpu(program, registries)
+    return result['a']
+
+
+print("Solution for the second part:", solution_for_second_part(program))
