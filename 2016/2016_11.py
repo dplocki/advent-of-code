@@ -125,4 +125,12 @@ The third floor contains a lithium generator.
 The fourth floor contains nothing relevant.'''.splitlines(), 11)
 
 # The input is taken from: https://adventofcode.com/2016/day/11/input
-print("Solution for the first part:", find_the_fastest_way(load_data(load_file('input.11.txt'))))
+facility_map = load_data(load_file('input.11.txt'))
+print("Solution for the first part:", find_the_fastest_way(facility_map))
+
+facility_map[FIRST_FLOOR].append(('elerium', 'generator'))
+facility_map[FIRST_FLOOR].append(('dilithium', 'generator'))
+facility_map[FIRST_FLOOR].append(('elerium', 'microchip'))
+facility_map[FIRST_FLOOR].append(('dilithium', 'microchip'))
+
+print("Solution for the second part:", find_the_fastest_way(facility_map))
