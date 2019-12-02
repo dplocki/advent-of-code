@@ -50,3 +50,11 @@ assert simulation(test_input, 5) == True
 discs = parse(load_input_file('input.15.txt'))
 
 print("Solution for the first part:", solution_for_first_part(discs))
+
+
+def solution_for_second_part(disc):
+    discs[len(discs) + 1] = (11, 0)
+    return solution_for_first_part(discs)
+
+
+print("Solution for the second part:", solution_for_second_part(discs))
