@@ -21,7 +21,7 @@ def run_program(memory):
 
 
 def solution_for_the_first_part(memory_input):
-    memory = memory_input[:]
+    memory = memory_input.copy()
     memory[1] = 12
     memory[2] = 2
 
@@ -32,3 +32,17 @@ def solution_for_the_first_part(memory_input):
 memory_input = [int(x) for x in load_input_file('input.02.txt').split(',')]
 
 print("Solution for the first part:", solution_for_the_first_part(memory_input))
+
+
+def solution_for_the_second_part(memory_input):
+    for x in range(0, 100):
+        for y in range(0, 100):
+            memory = memory_input.copy()
+            memory[1] = x
+            memory[2] = y
+
+            if run_program(memory) == 19690720:
+                return x * 100 + y
+
+
+print("Solution for the second part:", solution_for_the_second_part(memory_input))
