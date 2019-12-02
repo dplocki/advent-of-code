@@ -39,3 +39,11 @@ assert calculate_checksum('10000011110010000111') == '01100'
 # The input is taken from: https://adventofcode.com/2016/day/16/input
 input = load_input_file('input.16.txt')
 print("Solution for the first part:", solution_for_first_part(input))
+
+
+def solution_for_second_part(input):
+    disc_content = fill_the_disc(input, 35651584)
+    return calculate_checksum(disc_content)
+
+
+print("Solution for the second part:", solution_for_second_part(input))
