@@ -27,3 +27,35 @@ def solution_for_first_task(picture):
 # The input is taken from: https://adventofcode.com/2019/day/8/input
 picture = load_input_file('input.08.txt')
 print("Solution for the first part:", solution_for_first_task(picture))
+
+
+def solution_for_second_task(picture):
+
+    def transform_picture(picture, size):
+        layers = split_to_layers(picture, size)
+        current_picture = list(next(layers))
+        for layer in layers:
+            current_picture = [(f if f != '2' else s) for f, s in zip(current_picture, list(layer))]
+
+        return current_picture
+
+    def split_picture_to_lines(picture, size):
+        result = ''
+        i = 0
+        while i < len(picture):
+            result += ''.join(picture[i:i + size[0]]) + '\n'
+            i += size[0]
+
+        return result
+
+    def decolour(picture):
+        return picture.replace('0', '#').replace('1', ' ')
+
+    return decolour(
+            split_picture_to_lines(
+                transform_picture(picture, PICTURE_SIZE),
+                PICTURE_SIZE))
+
+
+print("Solution for the first part:")
+print(solution_for_second_task(picture))
