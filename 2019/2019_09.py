@@ -129,3 +129,4 @@ def run_program_to_finished(memory, initial_input, index=0):
 # The input is taken from: https://adventofcode.com/2019/day/9/input
 program = load_input_file('input.09.txt')
 print("Solution for the first part:", run_program_to_finished(program[:], [1]))
+print("Solution for the second part:", run_program_to_finished(program[:], [2]))
