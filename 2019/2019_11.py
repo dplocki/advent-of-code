@@ -1,4 +1,6 @@
 END_OPTCODE = 99
+BLACK = 0
+WHITE = 1
 
 
 def load_input_file(file_name):
@@ -6,7 +8,7 @@ def load_input_file(file_name):
         return [int(x) for x in file.read().split(',')]
 
 
-def run_program(memory: {}, outside, index=0) -> []:
+def run_program(memory: {}, outside, index=0, relative_base=0) -> []:
 
     def from_memory(memory, paramater, relative_base):
         index, mode = paramater
@@ -19,7 +21,7 @@ def run_program(memory: {}, outside, index=0) -> []:
             return memory.get(index, 0)
         # relative mode
         elif mode == 2:
-            return memory.get(relative_base + memory[index])
+            return memory.get(relative_base + memory[index], 0)
         else:
             raise Exception(f'Uknown mode: {mode}')
 
@@ -41,8 +43,6 @@ def run_program(memory: {}, outside, index=0) -> []:
 
         memory[new_index] = value
 
-    relative_base = 0
-
     while True:
         cmd = memory[index]
 
@@ -52,7 +52,7 @@ def run_program(memory: {}, outside, index=0) -> []:
         third_parameter = (index + 3, (cmd // 10000) % 10)
 
         if optcode == END_OPTCODE:
-            return outside, index, memory
+            return outside, index, memory, relative_base
 
         # Calculation
         elif optcode == 1: # adding
@@ -80,7 +80,7 @@ def run_program(memory: {}, outside, index=0) -> []:
 
         elif optcode == 4:
             index += 2
-            return from_memory(memory, first_parameter, relative_base), index, memory
+            return from_memory(memory, first_parameter, relative_base), index, memory, relative_base
 
         # Jumps
         elif optcode == 5: # jump-if-true
@@ -116,22 +116,19 @@ def run_program(memory: {}, outside, index=0) -> []:
             raise Exception(f'Unknown opcode: "{cmd}"')
 
 
-def run_program_to_finished(memory):
-    BLACK = 0
-
+def run_painting_program(memory, initial_state = None):
     memory = {i:v for i, v in enumerate(memory)}
-    index = 0
-    panels = {}
-    x, y = 0, 0
-    facing = 0
+    index, relative_base = 0, 0
+    panels = initial_state or {}
+    x, y, facing = 0, 0, 0
 
     while True:
-        output, index, memory = run_program(memory, [panels.get((x, y), BLACK)], index)
+        output, index, memory, relative_base = run_program(memory, [panels.get((x, y), BLACK)], index, relative_base)
         if memory[index] == END_OPTCODE:
             break
 
         panels[(x, y)] = output
-        output, index, memory = run_program(memory, [panels.get((x, y), BLACK)], index)
+        output, index, memory, relative_base = run_program(memory, [panels.get((x, y), BLACK)], index, relative_base)
         if memory[index] == END_OPTCODE:
             break
 
@@ -149,9 +146,32 @@ def run_program_to_finished(memory):
         elif facing == 3:
             x += 1
 
-    return len(panels.keys())
+    return panels
+
+
+def solution_for_first_part(task_input):
+    panels = run_painting_program(task_input)
+    return len(panels)
 
 
 # The input is taken from: https://adventofcode.com/2019/day/11/input
 task_input = load_input_file('input.11.txt')
-print("Solution for the first part:", run_program_to_finished(task_input))
+print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input):
+    panels = run_painting_program(task_input, {(0,0): WHITE})
+
+    coorinates_list = panels.keys()
+    x_coorinates = [x for x, _ in coorinates_list]
+    y_coorinates = [y for _, y in coorinates_list]
+
+    for y in range(min(y_coorinates), max(y_coorinates) + 1):
+        for x in range(min(x_coorinates), max(x_coorinates) + 1):
+            print('#' if panels.get((x, y), BLACK) == WHITE else '.', end='')
+        
+        print()
+
+
+print("Solution for the second part:")
+solution_for_second_part(task_input)
