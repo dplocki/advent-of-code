@@ -26,7 +26,7 @@ def parse(lines: [str]):
     return walls, nodes
 
 
-def find_all_paths_to_nodes(walls, nodes, node):
+def find_paths_lengths_to_all_nodes(walls, nodes, node):
 
     def find_all_posibilities(walls: set, node):
         x, y = node
@@ -59,32 +59,29 @@ def find_all_paths_to_nodes(walls, nodes, node):
         }
 
 
-def check_path(connection_matrix, path):
-    prev_node = 0
-    path_steps = 0
+def find_the_minimum_path_length(maze_map: [str], path_generator):
 
-    for node in path:
-        path_steps += connection_matrix[prev_node][node]
-        prev_node = node
+    def check_path(connection_matrix, path):
+        prev_node = 0
+        path_steps = 0
 
-    return path_steps
+        for node in path:
+            path_steps += connection_matrix[prev_node][node]
+            prev_node = node
+
+        return path_steps
+
+    walls, nodes = parse(maze_map)
+    connection_matrix = {node_name:find_paths_lengths_to_all_nodes(walls, nodes, nodes[node_name]) for node_name in nodes.keys()}
+    return min([check_path(connection_matrix, path) for path in path_generator(nodes)])
 
 
 def solution_for_first_part(maze_map: [str]):
-    walls, nodes = parse(maze_map)
 
-    connection_matrix = {}
-    nodes_by_name = nodes.keys()
+    def path_generator(nodes):
+        yield from itertools.permutations([node for node in nodes.keys() if node != START_NODE])
 
-    connection_matrix = {node_name:find_all_paths_to_nodes(walls, nodes, nodes[node_name]) for node_name in nodes_by_name}
-
-    results = []
-    for path in itertools.permutations([node for node in nodes.keys() if node != START_NODE]):
-        path_steps = check_path(connection_matrix, path)
-        if path_steps != None:
-            results.append(path_steps)
-
-    return min(results)
+    return find_the_minimum_path_length(maze_map, path_generator)
 
 
 test_input = '''###########
@@ -96,4 +93,17 @@ test_input = '''###########
 assert solution_for_first_part(test_input) == 14
 
 # The input is taken from: https://adventofcode.com/2016/day/24/input
-print("Solution for the first part:", solution_for_first_part(load_input_file('input.24.txt')))
+maze_map = list(load_input_file('input.24.txt'))
+print("Solution for the first part:", solution_for_first_part(maze_map))
+
+
+def solution_for_second_part(maze_map: [str]):
+
+    def path_generator(nodes):
+        for path in itertools.permutations([node for node in nodes.keys() if node != START_NODE]):
+            yield list(path) + [0]
+
+    return find_the_minimum_path_length(maze_map, path_generator)
+
+
+print("Solution for the second part:", solution_for_second_part(maze_map))
