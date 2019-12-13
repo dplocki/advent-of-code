@@ -1,5 +1,7 @@
 END_OPTCODE = 99
 BLOCK_TILE = 2
+PADDLE_TILE = 3
+BALL_TILE = 4
 
 
 def load_input_file(file_name):
@@ -138,15 +140,45 @@ def split_to_groups(generator, size):
 
 
 def solution_for_first_part(memory):
-    result = {}
     output = list(run_arcade_program(memory))
-
-    for x, y, c in [tuple(output[x:x+3]) for x in range(0, len(output), 3)]:
-        result[(x, y)] = c
-
-    return len([k for k, v in result.items() if v == BLOCK_TILE])
+    return len([c for x, y, c in [tuple(output[x:x+3]) for x in range(0, len(output), 3)] if c == BLOCK_TILE])
 
 
 # The input is taken from: https://adventofcode.com/2019/day/13/input
 memory = list(load_input_file('input.13.txt'))
 print("Solution for the first part:", solution_for_first_part(memory))
+
+
+def solution_for_second_part(memory):
+    SCORE_INDICATOR = -1, 0
+
+    memory = {i:v for i, v in enumerate(memory)}
+    index, relative_base = 0, 0
+    memory[0] = 2
+
+    padle_x_position = 0
+    ball_x_position = 0
+    score = 0
+    joystick_output = 0
+    raw_output = []
+
+    while memory[index] != END_OPTCODE:
+        current_output, index, memory, relative_base = run_program(memory, [joystick_output], index, relative_base)
+        raw_output.append(current_output)
+
+        if len(raw_output) == 3:
+            if raw_output[0] == SCORE_INDICATOR[0] and raw_output[1] == SCORE_INDICATOR[1]:
+                score = raw_output[2]
+
+            if raw_output[2] == PADDLE_TILE:
+                padle_x_position = raw_output[0]
+
+            if raw_output[2] == BALL_TILE:
+                ball_x_position = raw_output[0]
+
+            joystick_output = ball_x_position - padle_x_position
+            raw_output = []
+
+    return score
+
+print("Solution for the second part:", solution_for_second_part(memory))
