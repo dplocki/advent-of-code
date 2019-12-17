@@ -1,4 +1,8 @@
+import math
+
+
 ORE = 'ORE'
+FUEL = 'FUEL'
 
 
 def load_input_file(file_name):
@@ -6,24 +10,23 @@ def load_input_file(file_name):
         yield from [line.strip() for line in file]
 
 
-def parse(lines):
+def build_recipty(lines):
 
     def parse_ingredient(raw_input):
         number, name = raw_input.split(' ')
         return int(number), name
 
 
-    for line in lines:
-        raw_needed, raw_result = line.split(' => ')
+    def parse_recipes(lines: [str]):
+        for line in lines:
+            raw_needed, raw_result = line.split(' => ')
 
-        yield list(map(parse_ingredient, raw_needed.split(', '))), parse_ingredient(raw_result)
+            yield list(map(parse_ingredient, raw_needed.split(', '))), parse_ingredient(raw_result)
+
+    return {result[1]:(result[0], ingridient_list) for ingridient_list, result in parse_recipes(lines)}
 
 
-def build_recepty(reaction_list: {}):
-    return {result[1]:(result[0], ingridient_list) for ingridient_list, result in reaction_list}
-
-
-def how_much_ore_need(reaction_list, what, how_much, leftovers):
+def how_much_ore_need(reaction_graph, what, how_much, leftovers):
     if what in leftovers:
         if leftovers[what] >= how_much:
             leftovers[what] -= how_much
@@ -35,15 +38,12 @@ def how_much_ore_need(reaction_list, what, how_much, leftovers):
     if what == ORE:
         return how_much, leftovers
 
-    will_produce, ingreedients = reaction_list[what]
-    multiplayer = 1
-
-    while how_much > will_produce * multiplayer:
-        multiplayer += 1
+    will_produce, ingreedients = reaction_graph[what]
+    multiplayer = max(1, math.ceil(how_much / will_produce))
 
     ore_need = 0
     for q, n in ingreedients:
-        o, leftovers = how_much_ore_need(reaction_list, n, q * multiplayer, leftovers)
+        o, leftovers = how_much_ore_need(reaction_graph, n, q * multiplayer, leftovers)
         ore_need += o
 
     leftovers[what] = leftovers.get(what, 0) + will_produce * multiplayer - how_much
@@ -51,8 +51,8 @@ def how_much_ore_need(reaction_list, what, how_much, leftovers):
     return ore_need, leftovers
 
 
-def solution_for_first_part(reaction_list):
-    ore_per_fuel, _ = how_much_ore_need(build_recepty(reaction_list), 'FUEL', 1, {})
+def solution_for_first_part(reaction_graph):
+    ore_per_fuel, _ = how_much_ore_need(reaction_graph, FUEL, 1, {})
     return ore_per_fuel
 
 
@@ -113,12 +113,41 @@ input_2210736_ore = '''171 ORE => 8 CNZTR
 5 BHXH, 4 VRPVC => 5 LTCX'''.splitlines()
 
 
-assert solution_for_first_part(list(parse(input_31_ore))) == 31
-assert solution_for_first_part(list(parse(input_165_ore))) == 165
-assert solution_for_first_part(list(parse(input_13312_ore))) == 13312
-assert solution_for_first_part(list(parse(input_180697_ore))) == 180697
-assert solution_for_first_part(list(parse(input_2210736_ore))) == 2210736
+assert solution_for_first_part(build_recipty(input_31_ore)) == 31
+assert solution_for_first_part(build_recipty(input_165_ore)) == 165
+assert solution_for_first_part(build_recipty(input_13312_ore)) == 13312
+assert solution_for_first_part(build_recipty(input_180697_ore)) == 180697
+assert solution_for_first_part(build_recipty(input_2210736_ore)) == 2210736
 
 # The input is taken from: https://adventofcode.com/2019/day/14/input
-reaction_list = list(parse(load_input_file('input.14.txt')))
-print("Solution for the first part:", solution_for_first_part(reaction_list))
+reaction_graph = build_recipty(load_input_file('input.14.txt'))
+ore_per_fuel = solution_for_first_part(reaction_graph)
+print("Solution for the first part:", ore_per_fuel)
+
+
+def solution_for_second_part(reaction_graph, ore_per_fuel):
+    trylion = 1_000_000_000_000
+    right = trylion
+    left = trylion // ore_per_fuel
+    best = 0
+
+    while left <= right:
+        mid = (left + right) // 2
+
+        ore_need, _ = how_much_ore_need(reaction_graph, FUEL, mid, {})
+        if ore_need < trylion:
+            best = max(best, mid)
+            left = mid + 1
+        elif ore_need > trylion:
+            right = mid - 1
+        else:
+            return mid
+
+    return best
+
+
+assert solution_for_second_part(build_recipty(input_13312_ore), 13312) == 82892753
+assert solution_for_second_part(build_recipty(input_180697_ore), 180697) == 5586022
+assert solution_for_second_part(build_recipty(input_2210736_ore), 2210736) == 460664
+
+print("Solution for the second part:", solution_for_second_part(reaction_graph, ore_per_fuel))
