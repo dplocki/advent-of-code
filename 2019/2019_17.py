@@ -163,3 +163,128 @@ def solution_for_first_part(scaffold_map: set, scaffold_map_size):
 memory = list(load_input_file('input.17.txt'))
 scaffold_map, scaffold_map_size, vaccum_robot_position = get_scaffold_map(memory)
 print("Solution for the first part:", solution_for_first_part(scaffold_map, scaffold_map_size))
+
+
+def solution_for_second_part(memory, scaffold_map: set, vaccum_robot_position: tuple):
+
+
+    def find_the_path(scaffold_map: set, vaccum_robot_position: tuple):
+
+
+        def where_turn(x, y, facing, scaffold_map, visited):
+            tmp = (x - 1, y)
+            if tmp in scaffold_map and not tmp in visited:
+                return {
+                        '^': ('L', '<'),
+                        'v': ('R', '<')
+                    }[facing]
+
+            tmp = (x + 1, y)
+            if tmp in scaffold_map and not tmp in visited:
+                return {
+                        '^': ('R', '>'),
+                        'v': ('L', '>')
+                    }[facing]
+
+            tmp = (x, y - 1)
+            if tmp in scaffold_map and not tmp in visited:
+                return {
+                        '<': ('R', '^'),
+                        '>': ('L', '^')
+                    }[facing]
+
+            tmp = (x, y + 1)
+            if tmp in scaffold_map and not tmp in visited:
+                return {
+                        '<': ('L', 'v'),
+                        '>': ('R', 'v')
+                    }[facing]
+
+            return None, facing
+
+
+        def reformat_path(path):
+            steps = 0
+            for c in path:
+                if c == 'M':
+                    steps += 1
+                else:
+                    if steps > 0:
+                        yield str(steps)
+                        steps = 0
+                    yield c
+
+            if steps > 0:
+                yield str(steps)
+
+
+        visited = set()
+        start_x, start_y, facing = vaccum_robot_position
+        x, y = start_x, start_y
+        path = ''
+
+        while True:
+            new_position = {
+                'v': (x, y + 1),
+                '^': (x, y - 1),
+                '<': (x - 1, y),
+                '>': (x + 1, y)
+            }[facing]
+
+            if new_position in scaffold_map:
+                path += 'M'
+                visited.add(new_position)
+                x, y = new_position
+            else:
+                instruction, facing = where_turn(x, y, facing, scaffold_map, visited)
+                if instruction == None:
+                    return ','.join(reformat_path(path))
+
+                path += instruction
+
+
+    def split_path_to_subfunction(path):
+
+        def get_token(path):
+            index = path.index(',')
+            token = path[:index]
+            if not token.isdigit() or token == '':
+                index = path.index(',', index + 1)
+
+            return path[:index], path[index + 1:]
+
+        def get_the_longest(path):
+            result, rest_of_path = get_token(path)
+            n, rest_of_path = get_token(rest_of_path)
+            while result + ',' + n in rest_of_path:
+                result = result + ',' + n
+                n, rest_of_path = get_token(rest_of_path)
+
+            return result
+
+        
+        a = get_the_longest(path).strip(',')
+        b = get_the_longest(path[len(a) + 1:]).strip(',')
+        c = get_the_longest(path.replace(a, '').replace(b, '').strip(',')).strip(',')
+        
+        return [
+                path.replace(a, 'A').replace(b, 'B').replace(c, 'C'),
+                a,
+                b,
+                c
+            ]
+
+
+    memory = {i:v for i, v in enumerate(memory)}
+    memory[0] = 2
+
+    path = find_the_path(scaffold_map, vaccum_robot_position)
+    input_for_program = [ord(c) for c in '\n'.join(split_path_to_subfunction(path) + ['n\n'])]
+
+    for output in run_program_to_end(memory, input_for_program):
+        pass
+
+    return output
+
+
+print("Solution for the second part:", solution_for_second_part(memory, scaffold_map, vaccum_robot_position))
