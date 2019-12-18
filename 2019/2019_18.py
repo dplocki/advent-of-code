@@ -52,16 +52,19 @@ def get_paths_metadata_to_other_keys(maze: dict, start: tuple, keys: dict):
 
             posibilities.append((next_position, next_steps, needed_keys.copy()))
 
-    return {key_name:(visited[key_position][0], visited[key_position][1]) for key_name, key_position in keys.items() if key_position != start}
+    return {
+            key_name:(visited[key_position][0], visited[key_position][1])
+            for key_name, key_position in keys.items()
+            if  key_position != start and key_position in visited
+        }
 
 
-def get_path_length(paths_metadata, keys_positions, start_position):
+def get_path_length(get_new_posibilites, build_possibility, paths_metadata, keys_positions, start_position):
     possibilities = [(start_position, 0, set())]
     cache = {}
 
     while possibilities:
         current_position, length, own_keys = possibilities.pop()
-
         if len(own_keys) == len(keys_positions):
             yield length
             continue
@@ -74,25 +77,33 @@ def get_path_length(paths_metadata, keys_positions, start_position):
 
         cache[current_position, path_hash] = length
 
-        for key_name, metadata in paths_metadata[current_position].items():
+        for key_name, metadata in get_new_posibilites(paths_metadata, current_position):
             join_length, need_keys = metadata
             if not key_name in own_keys and need_keys.issubset(own_keys):
-                possibilities.append((
-                        keys_positions[key_name],
+                possibilities.append(
+                    build_possibility(
+                        current_position,
+                        keys_positions,
+                        key_name,
                         length + join_length,
-                        own_keys.union([key_name])
-                    ))
+                        own_keys.union([key_name])))
 
 
 def solution_for_first_part(input: [str]):
-    maze, start_position, keys_positions = read_maze(input)
 
+    def get_new_posibilites(paths_metadata, current_position):
+        return paths_metadata[current_position].items()
+
+    def build_possibility(current_position, keys_positions, key_name, length, own_keys):
+        return (keys_positions[key_name], length, own_keys)
+
+    maze, start_position, keys_positions = read_maze(input)
     path_metadata = {
             position: get_paths_metadata_to_other_keys(maze, position, keys_positions)
             for position in ([start_position] + list(keys_positions.values()))
         }
 
-    return min(get_path_length(path_metadata, keys_positions, start_position))
+    return min(get_path_length(get_new_posibilites, build_possibility, path_metadata, keys_positions, start_position))
 
 
 assert solution_for_first_part('''#########
@@ -129,4 +140,84 @@ assert solution_for_first_part('''########################
 ########################'''.splitlines()) == 81
 
 #The input is taken from: https://adventofcode.com/2019/day/18/input
-print("Solution for the first part:", solution_for_first_part(load_input_file('input.18.txt')))
+maze_input = list(load_input_file('input.18.txt'))
+print("Solution for the first part:", solution_for_first_part(maze_input))
+
+
+def solution_for_second_part(input: [str]):
+
+    def get_new_posibilites(paths_metadata, current_position):
+        return list(paths_metadata[current_position[0]].items()) +\
+                list(paths_metadata[current_position[1]].items()) +\
+                list(paths_metadata[current_position[2]].items()) +\
+                list(paths_metadata[current_position[3]].items())
+
+
+    def build_possibility(start_position):
+
+        def internal(current_position, keys_positions, key_name, length, own_keys):
+            k_x, k_y = keys_positions[key_name]
+            x, y = start_position
+
+            robot_index = None
+            if k_x <= x  and k_y <= y:
+                robot_index = 0
+            elif k_x >= x and k_y <= y:
+                robot_index = 1
+            elif k_x <= x and k_y >= y:
+                robot_index = 2
+            elif k_x >= x and k_y >= y:
+                robot_index = 3
+
+            tmp = list(current_position)
+            tmp[robot_index] = keys_positions[key_name]
+            
+            return tuple(tmp), length, own_keys
+
+        return internal
+
+
+    maze, start_position, keys_positions = read_maze(input)
+    x, y = start_position
+    start_positions = [(x - 1, y - 1), (x + 1, y - 1), (x - 1, y + 1), (x + 1, y + 1)]
+    maze[x, y] = '#'
+    maze[x, y + 1] = '#'
+    maze[x, y - 1] = '#'
+    maze[x - 1, y] = '#'
+    maze[x + 1, y] = '#'
+
+    path_metadata = {
+                position: get_paths_metadata_to_other_keys(maze, position, keys_positions)
+                for position in (start_positions + list(keys_positions.values()))
+            }
+            
+    return min(get_path_length(get_new_posibilites, build_possibility(start_position), path_metadata, keys_positions, tuple(start_positions)))
+
+
+assert solution_for_second_part('''#######
+#a.#Cd#
+##...##
+##.@.##
+##...##
+#cB#Ab#
+#######'''.splitlines()) == 8
+
+assert solution_for_second_part('''###############
+#d.ABC.#.....a#
+######...######
+######.@.######
+######...######
+#b.....#.....c#
+###############'''.splitlines()) == 24
+
+assert solution_for_second_part('''#############
+#g#f.D#..h#l#
+#F###e#E###.#
+#dCba...BcIJ#
+#####.@.#####
+#nK.L...G...#
+#M###N#H###.#
+#o#m..#i#jk.#
+#############'''.splitlines()) == 72
+
+print("Solution for the second part:", solution_for_second_part(maze_input))
