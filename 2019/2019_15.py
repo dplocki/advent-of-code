@@ -213,10 +213,32 @@ def find_path_size_to(maze_map, end_point):
         )
 
 
-def solution_for_first_part(task_input: [int]):
-    return find_path_size_to(*run_program_to_end(task_input))
+def solution_for_first_part(maze_map: dict, oxygen_system_location: tuple) -> int:
+    return find_path_size_to(maze_map, oxygen_system_location)
+
 
 # The input is taken from: https://adventofcode.com/2019/day/15/input
-task_input = list(load_input_file('input.15.txt'))
+maze_map, oxygen_system_location = run_program_to_end(load_input_file('input.15.txt'))
+print("Solution for the first part:", solution_for_first_part(maze_map, oxygen_system_location))
 
-print("Solution for the first part:", solution_for_first_part(task_input))
+
+def solution_for_second_part(maze_map, oxygen_system_location):
+    possiblities = [oxygen_system_location]
+    filled_oxygen = set()
+    minutes = 0
+
+    while True:
+        filled_oxygen.update(possiblities)
+        possiblities = [p
+                for point in possiblities
+                for p in [(point[0], point[1] - 1), (point[0], point[1] + 1), (point[0] - 1, point[1]), (point[0] + 1, point[1])]
+                if p not in filled_oxygen and maze_map[p] != WALL
+            ]
+
+        if possiblities:
+            minutes += 1
+        else:
+            return minutes
+
+
+print("Solution for the second part:", solution_for_second_part(maze_map, oxygen_system_location))
