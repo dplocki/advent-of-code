@@ -115,7 +115,7 @@ def run_program(memory: {}, outside, index=0, relative_base=0) -> []:
         else:
             raise Exception(f'Unknown opcode: "{cmd}"')
 
-
+    
 def run_program_to_end(memory: {}, x, y):
     index, relative_base = 0, 0
     program_input = [x, y]
@@ -126,11 +126,32 @@ def run_program_to_end(memory: {}, x, y):
     return output
 
 
-def solution_for_first_part(task_input):
-    memory = {i:v for i, v in enumerate(task_input)}
-    return len([1 for x in range(50) for y in range(50) if run_program_to_end(memory.copy(), x, y)])
+def solution_for_first_part(task_input: dict) -> int:
+    return len([
+            1
+            for x in range(50)
+            for y in range(50)
+            if run_program_to_end(task_input.copy(), x, y)
+        ])
 
 
 # The input is taken from: https://adventofcode.com/2019/day/19/input
-task_input = list(load_input_file('input.19.txt'))
+task_input = {i:v for i, v in enumerate(load_input_file('input.19.txt'))}
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: dict) -> int:
+    x, y = 0, 99
+
+    while True:
+        while run_program_to_end(task_input.copy(), x, y) == 0:
+            x += 1
+
+        test_result = [run_program_to_end(task_input.copy(), tx, ty) for tx, ty in [(x, y - 99), (x + 99, y - 99)]]
+        if sum(test_result) == 2:
+            return 10_000 * x + (y - 99)
+
+        y += 1
+
+
+print("Solution for the second part:", solution_for_second_part(task_input))
