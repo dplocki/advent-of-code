@@ -43,7 +43,10 @@ def parse(task_input: [str]):
     zz_position = [p for p, l in portals.items() if l == 'ZZ'][0]
 
     portal_connections = {
-            point: [p for p, l in portals.items() if l == label and p != point][0] # location of pair
+            point: (
+                [p for p, l in portals.items() if l == label and p != point][0], # location of pair
+                point[0] == min_x or point[0] == max_x or point[1] == min_y or point[1] == max_y 
+            )
             for point, label in portals.items()
             if not label in ['AA', 'ZZ']
         }
@@ -84,26 +87,27 @@ def tradital_connections_map(maze_map: dict, portals: dict, aa_position: tuple, 
     }
 
 
-def find_the_shortest_path(portals_map: dict, portals, start_point, end_point):
-    possibilites = [(start_point, 0)]
-    visited = set()
-
-    while possibilites:
-        current_portal_location, path_size = possibilites.pop(0)
-        visited.add(current_portal_location)
-
-        for point, size_of_path_to_it in portals_map[current_portal_location].items():
-            if point == end_point:
-                return path_size + size_of_path_to_it
-            elif point in visited:
-                continue
-            else:
-                possibilites.append((portals[point], path_size + size_of_path_to_it + 1))
-
-    return None
-
-
 def solution_for_first_part(task_input):
+
+    def find_the_shortest_path(portals_map: dict, portals, start_point, end_point):
+        possibilites = [(start_point, 0)]
+        visited = set()
+
+        while possibilites:
+            current_portal_location, current_path_size = possibilites.pop(0)
+            visited.add(current_portal_location)
+
+            for point, size_of_path_to_it in portals_map[current_portal_location].items():
+                if point == end_point:
+                    return current_path_size + size_of_path_to_it
+                elif point in visited:
+                    continue
+                else:
+                    jump_to_point, _ = portals[point]
+                    possibilites.append((jump_to_point, current_path_size + size_of_path_to_it + 1))
+
+        return None
+
     maze_map, portals, aa_position, zz_position = parse(task_input)
     portals_map = tradital_connections_map(maze_map, portals, aa_position, zz_position)
     return find_the_shortest_path(portals_map, portals, aa_position, zz_position)
@@ -151,3 +155,81 @@ YN......#               VT..#....QG
 # The input is taken from: https://adventofcode.com/2019/day/20/input
 task_input = list(load_input_file('input.20.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input):
+
+    def find_the_shortest_path_with_recursion(portals_map: dict, portals, start_point, end_point):
+        possibilites = [(start_point, 0, 0)]
+        visited = set()
+
+        while possibilites:
+            current_portal_location, current_path_size, recursion_level = possibilites.pop(0)
+            visited.add((current_portal_location, recursion_level))
+
+            for point, size_of_path_to_it in portals_map[current_portal_location].items():
+                if point == end_point:
+                    if recursion_level == 0:
+                        return current_path_size + size_of_path_to_it
+                    
+                    continue
+                elif (point, recursion_level) in visited:
+                    continue
+                else:
+                    jump_to_point, is_recursion_level_fall = portals[point]
+
+                    if is_recursion_level_fall and recursion_level == 0:
+                        continue
+                    
+                    possibilites.append((
+                            jump_to_point,
+                            current_path_size + size_of_path_to_it + 1,
+                            recursion_level + (-1 if is_recursion_level_fall else 1)
+                        ))
+
+        return None
+
+    maze_map, portals, aa_position, zz_position = parse(task_input)
+    portals_map = tradital_connections_map(maze_map, portals, aa_position, zz_position)
+    return find_the_shortest_path_with_recursion(portals_map, portals, aa_position, zz_position)
+
+
+assert solution_for_second_part('''             Z L X W       C                 
+             Z P Q B       K                 
+  ###########.#.#.#.#######.###############  
+  #...#.......#.#.......#.#.......#.#.#...#  
+  ###.#.#.#.#.#.#.#.###.#.#.#######.#.#.###  
+  #.#...#.#.#...#.#.#...#...#...#.#.......#  
+  #.###.#######.###.###.#.###.###.#.#######  
+  #...#.......#.#...#...#.............#...#  
+  #.#########.#######.#.#######.#######.###  
+  #...#.#    F       R I       Z    #.#.#.#  
+  #.###.#    D       E C       H    #.#.#.#  
+  #.#...#                           #...#.#  
+  #.###.#                           #.###.#  
+  #.#....OA                       WB..#.#..ZH
+  #.###.#                           #.#.#.#  
+CJ......#                           #.....#  
+  #######                           #######  
+  #.#....CK                         #......IC
+  #.###.#                           #.###.#  
+  #.....#                           #...#.#  
+  ###.###                           #.#.#.#  
+XF....#.#                         RF..#.#.#  
+  #####.#                           #######  
+  #......CJ                       NM..#...#  
+  ###.#.#                           #.###.#  
+RE....#.#                           #......RF
+  ###.###        X   X       L      #.#.#.#  
+  #.....#        F   Q       P      #.#.#.#  
+  ###.###########.###.#######.#########.###  
+  #.....#...#.....#.......#...#.....#.#...#  
+  #####.#.###.#######.#######.###.###.#.#.#  
+  #.......#.......#.#.#.#.#...#...#...#.#.#  
+  #####.###.#####.#.#.#.#.###.###.#.###.###  
+  #.......#.....#.#...#...............#...#  
+  #############.#.#.###.###################  
+               A O F   N                     
+               A A D   M                     '''.splitlines()) == 396
+
+print("Solution for the second part:", solution_for_second_part(task_input))
