@@ -117,26 +117,46 @@ def run_program(memory: {}, outside, index=0, relative_base=0) -> []:
             raise Exception(f'Unknown opcode: "{cmd}"')
 
     
-def run_program_to_end(memory: {}, program_input):
+def run_program_to_end(task_input: {}, script):
+    memory = {i:v for i, v in enumerate(task_input)}
+    program_input = [ord(c) for c in script]
     index, relative_base = 0, 0
+
     while memory[index] != END_OPTCODE:
         output, index, memory, relative_base = run_program(memory, program_input, index, relative_base)
-        yield output
+
+        if output > 0x10FFFF:
+            return output
+
+    return None
 
 
 def solution_for_first_part(task_input):
-    script = '''OR A J
+    return run_program_to_end(task_input,'''OR A J
 AND B J
 AND C J
 NOT J J
-AND D J'''
-
-    memory = {i:v for i, v in enumerate(task_input)}
-    for i in run_program_to_end(memory, [ord(c) for c in script + '\nWALK\n']):
-        if i > 0x10FFFF:
-            return i
+AND D J
+WALK
+''')
 
 
 # The input is taken from: https://adventofcode.com/2019/day/21/input
 memory = list(load_input_file('input.21.txt'))
 print("Solution for the first part:", solution_for_first_part(memory))
+
+
+def solution_for_second_part(task_input):
+    return run_program_to_end(task_input, '''OR A J
+AND B J
+AND C J
+NOT J J
+AND D J
+OR H T
+OR E T
+AND T J
+RUN
+''')
+
+
+print("Solution for the second part:", solution_for_second_part(memory))
