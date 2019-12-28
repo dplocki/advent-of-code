@@ -88,7 +88,7 @@ def find_first_missing(today):
 
 
 def for_which_date_create(input_date):
-    if input_date.month == 12 and not is_solution_for_day_exist(input_date.year, input_date.day):
+    if input_date.month == 12 and input_date.day <= 25 and not is_solution_for_day_exist(input_date.year, input_date.day):
         return today.year, today.day
     else:
         return find_first_missing(today)
