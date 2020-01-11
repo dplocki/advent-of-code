@@ -7,40 +7,37 @@ def load_input_file(file_name):
     return list(load(file_name))
 
 
-def position_the_line(line, been, count_function):
+def get_line_points(line):
     x, y = 0, 0
     steps_counter = 0
 
     for i in line.split(','):
-        direction = i[0]
-        how_long = int(i[1:])
+        direction, how_long = i[0], int(i[1:])
 
         if direction == 'R' or direction == 'L':
             step = 1 if direction == 'R' else -1
             for _ in range(0, how_long):
                 x += step
                 steps_counter += 1
-                count_function(been, (x, y), steps_counter)
+                yield (x, y), steps_counter
         else:
             step = 1 if direction == 'U' else -1
             for _ in range(0, how_long):
                 y += step
                 steps_counter += 1
-                count_function(been, (x, y), steps_counter)
-
-    return been
+                yield (x, y), steps_counter
 
 
 def solution_for_first_part(input_lines):
 
-    def find_intersections(been, point, _):
-        been[point] = been.get(point, 0) + 1
+    def get_line_points_as_set(line) -> set:
+        return set([point for point, _ in get_line_points(line)])
 
-    been = position_the_line(input_lines[0], {}, find_intersections)
-    been = {k: 1 for k, _ in been.items()}
-    position_the_line(input_lines[1], been, find_intersections)
-
-    return min([abs(k[0]) + abs(k[1]) for k, v in been.items() if v > 1])
+    return min(
+            abs(x) + abs(y)
+            for x, y in get_line_points_as_set(input_lines[0])
+                .intersection(get_line_points_as_set(input_lines[1]))
+        )
 
 
 assert solution_for_first_part('''R8,U5,L5,D3
@@ -58,20 +55,13 @@ print("Solution for the first part:", solution_for_first_part(input_lines))
 
 
 def solution_for_second_part(input_lines):
+    first_line = {point:steps for point, steps in get_line_points(input_lines[0])}
 
-    def first_line(been, point, steps_counter):
-        if not point in been:
-            been[point] = (False, steps_counter, 0)
-
-    def second_line(been, point, steps_counter):
-        if point in been:
-            _, first_line_steps, second_line_steps = been[point]
-            been[point] = (True, first_line_steps, steps_counter if second_line_steps == 0 else second_line_steps)
-
-    been = position_the_line(input_lines[0], {}, first_line)
-    position_the_line(input_lines[1], been, second_line)
-
-    return min([v[1] + v[2] for k, v in been.items() if v[0] == True])
+    return min(
+        steps + first_line[point]
+        for point, steps in get_line_points(input_lines[1])
+        if point in first_line
+    )
 
 
 assert solution_for_second_part('''R75,D30,R83,U83,L12,D49,R71,U7,L72
