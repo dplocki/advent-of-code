@@ -10,7 +10,7 @@ def run_program(memory: {}, outside, index=0, relative_base=0) -> []:
 
     def from_memory(memory, paramater, relative_base):
         index, mode = paramater
-        
+
         # position mode
         if mode == 0:
             return memory.get(memory[index], 0)
@@ -65,12 +65,12 @@ def run_program(memory: {}, outside, index=0, relative_base=0) -> []:
         elif optcode == 2: # multiplication
             to_memory(
                 memory,
-                third_parameter, 
+                third_parameter,
                 from_memory(memory, first_parameter, relative_base) * from_memory(memory, second_parameter, relative_base),
                 relative_base
             )
             index += 4
-        
+
         # I/O operations
         elif optcode == 3:
             if outside:
@@ -86,7 +86,7 @@ def run_program(memory: {}, outside, index=0, relative_base=0) -> []:
         # Jumps
         elif optcode == 5: # jump-if-true
             index = from_memory(memory, second_parameter, relative_base) if from_memory(memory, first_parameter, relative_base) != 0 else index + 3
-        
+
         elif optcode == 6: # jump-if-false
             index = from_memory(memory, second_parameter, relative_base) if from_memory(memory, first_parameter, relative_base) == 0 else index + 3
 
@@ -116,36 +116,60 @@ def run_program(memory: {}, outside, index=0, relative_base=0) -> []:
         else:
             raise Exception(f'Unknown opcode: "{cmd}"')
 
-    
-def solution_for_first_part(task_input: dict) -> int:
+
+def run_network_return_nant_y(memory: dict) -> [int]:
     number_program = 50
-    program_output = [[] for network_address in range(number_program)]
     program_input = [[network_address] for network_address in range(number_program)]
     program_states = [(0, {i:v for i, v in enumerate(task_input)}, 0) for _ in range(number_program)]
+    nant = None
 
     while True:
         for n in range(number_program):
             index, memory, relative_base = program_states[n]
+
             if not program_input[n]:
                 program_input[n].append(-1)
 
             output, index, memory, relative_base = run_program(memory, program_input[n], index, relative_base)
+            if output != None:
+                where = output
+
+                output, index, memory, relative_base = run_program(memory, program_input[n], index, relative_base)
+                x = output
+
+                output, index, memory, relative_base = run_program(memory, program_input[n], index, relative_base)
+                y = output
+
+                if where == 255:
+                    nant = x, y
+                else:
+                    program_input[where].append(x)
+                    program_input[where].append(y)
+
             program_states[n] = index, memory, relative_base
 
-            if output != None:
-                program_output[n].append(output)
-            
-            if len(program_output[n]) > 2:
-                where = program_output[n].pop(0)
-                x = program_output[n].pop(0)
-                y = program_output[n].pop(0)
-                if where == 255:
-                    return y
-            
-                program_input[where].append(x)
-                program_input[where].append(y)
+        if nant != None and not any(program_input):
+            program_input[0].extend(nant)
+            yield nant[1]
+
+
+def solution_for_first_part(task_input: dict) -> int:
+    return next(run_network_return_nant_y(task_input))
 
 
 # The input is taken from: https://adventofcode.com/2019/day/23/input
 task_input = load_input_file('input.23.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: dict) -> int:
+    y_nant_set = set()
+
+    for y_nant in run_network_return_nant_y(task_input):
+        if y_nant in y_nant_set:
+            return y_nant
+        else:
+            y_nant_set.add(y_nant)
+
+
+print("Solution for the second part:", solution_for_second_part(task_input))
