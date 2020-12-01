@@ -8,10 +8,9 @@ def load_input_file(file_name):
         yield from (int(line.strip()) for line in file)
 
 def solution_for_first_part(task_input: [int]) -> int:
-    for value in task_input:
-        other_value = REQUIRED_SUM - value
-        if other_value in task_input:
-            return value * other_value
+    for v1, v2 in combinations(task_input, 2):
+        if v1 + v2 == REQUIRED_SUM:
+            return v1 * v2
 
 
 assert solution_for_first_part([1721, 979, 366, 299, 675, 1456]) == 514579
@@ -22,10 +21,9 @@ print("Solution for the first part:", solution_for_first_part(task_input))
 
 
 def solution_for_second_part(task_input: [int]) -> int:
-    for v1, v2 in combinations(task_input, 2):
-        other_value = REQUIRED_SUM - v1 - v2
-        if other_value in task_input:
-            return other_value * v1 * v2
+    for v1, v2, v3 in combinations(task_input, 3):
+        if v1 + v2 + v3 == REQUIRED_SUM:
+            return v1 * v2 * v3
 
 
 assert solution_for_second_part([1721, 979, 366, 299, 675, 1456]) == 241861950
