@@ -17,8 +17,8 @@ def decode(line: str) -> (int, int):
 
 
     return (
-        find_number(0, 127, [c == 'F' for c in line[:7]]),
-        find_number(0, 7, [c == 'L' for c in line[7:]])
+        find_number(0, 127, (c == 'F' for c in line[:7])),
+        find_number(0, 7, (c == 'L' for c in line[7:]))
     )
 
 
