@@ -16,7 +16,7 @@ def solution_for_first_part(task_input: [str]) -> int:
                 yield result
                 result = set()
             else:
-                result.update((c for c in line))
+                result.update(c for c in line)
 
         yield result
 
