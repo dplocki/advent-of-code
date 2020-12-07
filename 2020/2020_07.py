@@ -21,19 +21,33 @@ def parse(lines: [str]):
         yield main_bag, [parse_inside_bag(bag) for bag in inside_bags if bag != 'no other bags.']
 
 
-def can_contain_shiny_gold(bags_rule_set: dict, bag: str) -> bool:
-    rules = bags_rule_set[bag]
-
-    if 'shiny gold' in (bag_inside[1] for bag_inside in rules):
-        return True
-    
-    return any(can_contain_shiny_gold(bags_rule_set, bag_inside[1]) for bag_inside in rules)
-
-
 def solution_for_first_part(bags_rule_set: dict) -> int:
+
+    def can_contain_shiny_gold(bags_rule_set: dict, bag: str) -> bool:
+        rules = bags_rule_set[bag]
+
+        if 'shiny gold' in (bag_inside[1] for bag_inside in rules):
+            return True
+        
+        return any(can_contain_shiny_gold(bags_rule_set, bag_inside[1]) for bag_inside in rules)
+
+
     return sum(1 for bag_name in bags_rule_set.keys() if can_contain_shiny_gold(bags_rule_set, bag_name))
 
 
 # The input is taken from: https://adventofcode.com/2020/day/7/input
 bags_rule_set = { bag: contains for bag, contains in parse(load_input_file('input.07.txt')) }
 print("Solution for the first part:", solution_for_first_part(bags_rule_set))
+
+
+def solution_for_second_part(bags_rule_set: dict) -> int:
+
+    def count(bag_name: str) -> int:
+        inside_bags = bags_rule_set[bag_name]
+        return sum(bag[0] + bag[0] * count(bag[1]) for bag in inside_bags)
+
+
+    return count('shiny gold')
+
+
+print("Solution for the second part:", solution_for_second_part(bags_rule_set))
