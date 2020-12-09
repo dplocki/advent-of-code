@@ -13,53 +13,14 @@ def create_files(year: int, day: int):
     day_with_zero = str(day).zfill(2)
     file_input_name = f'input.{day_with_zero}.txt'
 
-    with open(os.path.join(str(year), f'{year}_{day_with_zero}.py'), 'w') as file:
-        file.writelines(f'''
-
-def load_input_file(file_name):
-    with open(file_name) as file:
-        return file.read().strip()
-
-
-def load_input_file(file_name):
-    with open(file_name) as file:
-        yield from (line.strip() for line in file)
-
-
-def parse(task_input: [str]):
-    pass
-
-
-def solution_for_first_part(task_input):
-    pass
-
-
-
-print(list(
-    parse(load_input_file('{file_input_name}'))
-))
-
-
-
-
-# The input is taken from: https://adventofcode.com/{year}/day/{day}/input
-task_input = load_input_file('{file_input_name}')
-# print("Solution for the first part:", )
-
-def visualization(point_dictionary):
-    xs = [x for x, _ in point_dictionary.keys()]
-    ys = [y for _, y in point_dictionary.keys()]
-    max_x = max(xs)
-    max_y = max(ys)
-    min_x = min(xs)
-    min_y = min(ys)
-
-    for y in range(min_y, max_y + 1):
-        for x in range(min_x, max_x + 1):
-            print(point_dictionary[x, y], end='')
-
-        print()
-''')
+    with open('new_task_template.py') as in_file:
+        with open(os.path.join(str(year), f'{year}_{day_with_zero}.py'), 'w') as out_file:
+            out_file.writelines(in_file.read().format(
+                day=day,
+                year=year,
+                day_with_zero=day_with_zero,
+                file_input_name=file_input_name
+            ))
 
     with open(file_input_name, 'w') as file:
         file.writelines('')
