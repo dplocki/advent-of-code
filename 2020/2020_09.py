@@ -8,18 +8,10 @@ def load_input_file(file_name: str) -> [int]:
 
 
 def solution_for_first_part(task_input: [int], preamble_size: int) -> int:
-
-    def check_for_sum(last_numbers: [int], requested_sum: int) -> bool:
-        for v1, v2 in combinations(last_numbers, 2):
-            if v1 + v2 == requested_sum:
-                return True
-
-        return False
-
-
     last_numbers = deque(task_input[:preamble_size], preamble_size)
+
     for number in task_input[preamble_size:]:
-        if not check_for_sum(last_numbers, number): 
+        if number not in map(sum, combinations(last_numbers, 2)):
             return number
 
         last_numbers.append(number)
