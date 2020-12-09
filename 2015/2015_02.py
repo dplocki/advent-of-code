@@ -1,12 +1,13 @@
 def load_input_file(file_name):
     with open(file_name) as file:
-        for line in file:
-            yield line.strip()
+        yield from (line.strip() for line in file)
 
 
 def parse(lines: [str]):
-    for line in lines:
-        yield tuple(map(int, line.split('x')))
+    yield from (
+            tuple(map(int, line.split('x')))
+            for line in lines
+        )
 
 
 def calculate_size(l, w, h):
@@ -19,13 +20,6 @@ def calculate_ribon_length(l, w, h):
 
 
 # The input is taken: https://adventofcode.com/2015/day/2/input
-print("Solution for the first part:", sum([
-        calculate_size(l, w, h)
-        for l, w, h in parse(load_input_file('input.02.txt'))
-    ]))
-
-
-print("Solution for the second part:", sum([
-        calculate_ribon_length(l, w, h)
-        for l, w, h in parse(load_input_file('input.02.txt'))
-    ]))
+task_input = list(parse(load_input_file('input.02.txt')))
+print("Solution for the first part:", sum(calculate_size(l, w, h) for l, w, h in task_input))
+print("Solution for the second part:", sum(calculate_ribon_length(l, w, h) for l, w, h in task_input))
