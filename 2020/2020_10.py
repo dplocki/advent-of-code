@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import Counter, defaultdict
 
 
 def load_input_file(file_name: str):
@@ -20,4 +20,20 @@ example_input = [28, 33, 18, 42, 31, 14, 46, 20, 48, 47, 24, 23, 49, 45, 19, 38,
 assert solution_for_first_part(example_input) == 220 
 
 # The input is taken from: https://adventofcode.com/2020/day/10/input
-print("Solution for the first part:", solution_for_first_part(load_input_file('input.10.txt')))
+task_input = list(load_input_file('input.10.txt'))
+print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: [int]) -> int:
+    jolts = sorted(task_input)
+    results = defaultdict(int)
+
+    results[0] = 1
+    for jolt in jolts:
+        results[jolt] = results[jolt - 1] + results[jolt - 2] + results[jolt - 3]
+
+    return results[jolts[-1]]
+
+
+assert solution_for_second_part(example_input) == 19208 
+print("Solution for the second part:", solution_for_second_part(task_input))
