@@ -13,7 +13,7 @@ def create_files(year: int, day: int):
     day_with_zero = str(day).zfill(2)
     file_input_name = f'input.{day_with_zero}.txt'
 
-    with open('new_task_template.py') as in_file:
+    with open('new_task.template.py') as in_file:
         with open(os.path.join(str(year), f'{year}_{day_with_zero}.py'), 'w') as out_file:
             out_file.writelines(in_file.read().format(
                 day=day,
