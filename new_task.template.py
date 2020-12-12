@@ -31,13 +31,12 @@ def solution_for_first_part(task_input):
     lines = list(parse(task_input))
 
 
-example_input = '''
-'''.splitlines()
+example_input = ''''''.splitlines()
 
 print(solution_for_first_part(example_input))
 # The input is taken from: https://adventofcode.com/{year}/day/{day}/input
 task_input = list(load_input_file('{file_input_name}'))
-result = solution_for_first_part(load_input_file(task_input))
+result = solution_for_first_part(task_input)
 print("Solution for the first part:", result)
 addToClipBoard(result)
 
@@ -55,3 +54,7 @@ def visualization(point_dictionary):
             print(point_dictionary[x, y], end='')
 
         print()
+
+
+# 8 - direction
+# [(-1, -1), (0, -1), (1, -1), (-1, 0),  (1, 0), (-1, 1), (0, 1), (1, 1)]
