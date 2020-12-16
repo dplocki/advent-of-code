@@ -2,7 +2,6 @@ import re
 import itertools
 import os
 import collections
-import functools
 
 
 def addToClipBoard(text) -> None:
