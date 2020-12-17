@@ -1,3 +1,4 @@
+from itertools import product
 from operator import itemgetter
 
 
@@ -12,40 +13,25 @@ def parse(lines: [str]):
             for x, c in enumerate(line))
 
 
-def solution_for_first_part(task_input):
+def simulator(active_cubes: set, dimention_number: int) -> int:
 
-    def get_all_points(current: set) -> [tuple]:
-        min_x = min(map(itemgetter(0), current)) - 1
-        min_y = min(map(itemgetter(1), current)) - 1
-        min_z = min(map(itemgetter(2), current)) - 1
+    def get_all_points(active_cubes: set) -> [tuple]:
+        ranges = [
+                range(min(map(itemgetter(i), active_cubes)) - 1, max(map(itemgetter(i), active_cubes)) + 2)
+                for i in range(dimention_number)]
 
-        max_x = max(map(itemgetter(0), current)) + 2
-        max_y = max(map(itemgetter(1), current)) + 2
-        max_z = max(map(itemgetter(2), current)) + 2
 
-        for x in range(min_x, max_x):
-            for y in range(min_y, max_y):
-                for z in range(min_z, max_z):
-                    yield (x, y, z)
+        yield from product(*ranges)
 
 
     def count_active_neighbors(current: set, point: tuple) -> int:
         result = 0
-        neighbors = [-1, 0, 1]
-
-        for x in neighbors:
-            for y in neighbors:
-                for z in neighbors:
-                    if x == 0 and y == 0 and z == 0:
-                        continue
-
-                    if (x + point[0], y + point[1], z + point[2]) in current:
-                        result += 1
+        for neighbor in product([-1, 0, 1], repeat=dimention_number):
+            if any(neighbor) and tuple(map(sum, zip(neighbor, point))) in current:
+                result += 1
 
         return result
 
-
-    active_cubes = set((x, y, 0) for x, y, c in parse(task_input) if c == '#')
 
     for _ in range(6):
         next_generation = set()
@@ -61,6 +47,10 @@ def solution_for_first_part(task_input):
     return len(active_cubes)
 
 
+def solution_for_first_part(task_input: list) -> int:
+    return simulator(set((x, y, 0) for x, y, c in parse(task_input) if c == '#'), 3)
+
+
 example_input = '''.#.
 ..#
 ###'''.splitlines()
@@ -70,3 +60,11 @@ solution_for_first_part(example_input) == 12
 # The input is taken from: https://adventofcode.com/2020/day/17/input
 task_input = list(load_input_file('input.17.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: list) -> int:
+    return simulator(set((x, y, 0, 0) for x, y, c in parse(task_input) if c == '#'), 4)
+
+
+assert solution_for_second_part(example_input) == 848
+print("Solution for the second part:", solution_for_second_part(task_input))
