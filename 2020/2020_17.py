@@ -16,12 +16,9 @@ def parse(lines: [str]):
 def simulator(active_cubes: set, dimention_number: int) -> int:
 
     def get_all_points(active_cubes: set) -> [tuple]:
-        ranges = [
+        yield from product(*(
                 range(min(map(itemgetter(i), active_cubes)) - 1, max(map(itemgetter(i), active_cubes)) + 2)
-                for i in range(dimention_number)]
-
-
-        yield from product(*ranges)
+                for i in range(dimention_number)))
 
 
     def count_active_neighbors(current: set, point: tuple) -> int:
