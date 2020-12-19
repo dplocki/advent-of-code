@@ -1,63 +1,78 @@
 import itertools
 
 
+class SimpleRule():
+
+    def __init__(self, character):
+        self.character = character
+
+    def parse(self, _, message):
+        return [message[1:]] if len(message) > 0 and self.character == message[0] else []
+
+
+class OtherRule():
+
+    def __init__(self, rule_index):
+        self.rule_index = rule_index
+
+    def parse(self, rules, message):
+        return rules[self.rule_index].parse(rules, message)
+
+
+class ChainRule():
+    
+    def __init__(self, rules):
+        self.rules = rules
+    
+    def parse(self, rules, message):
+        result = [message]
+        for token in self.rules:
+            result = list(itertools.chain(*[rules[token].parse(rules, r) for r in result]))
+            if not result:
+                return []
+
+        return result
+
+
+class OrRule():
+    
+    def __init__(self, parts):
+        self.parts = parts
+
+    def parse(self, rules, message):
+        return list(itertools.chain(*[part.parse(rules, message) for part in self.parts]))
+
+
 def load_input_file(file_name: str) -> str:
     with open(file_name) as file:
         return file.read().strip()
 
 
+def parse_rule(raw_rule: str):
+    if '"' in raw_rule:
+        return SimpleRule(raw_rule[1])
+    elif '|' in raw_rule:
+        return OrRule([ChainRule(list(map(int, x.split()))) for x in raw_rule.split(' | ')])
+    elif ' ' in raw_rule:
+        return ChainRule(list(map(int, raw_rule.split())))
+
+    return OtherRule(int(raw_rule))
+
+
 def parse(task_input: [str]):
+
     raw_rules, raw_messages = task_input.split('\n\n')
 
     rules = {}
     for rule in raw_rules.splitlines():
         raw_rule_index, rule = rule.split(': ')
-        rules[int(raw_rule_index)] = rule
+        rules[int(raw_rule_index)] = parse_rule(rule)
 
     return rules, raw_messages.splitlines()
 
 
 def count_valid_message(rules: dict, messages: [str]) -> int:
-    memory = {}
-
-
-    def memoize(func):
-
-        def inner(rules, rule, message) -> int:
-            if (rule, message) not in memory:
-                memory[(rule, message)] = func(rules, rule, message)
-
-            return memory[(rule, message)]
-
-
-        return inner
-
-    @memoize
-    def check_rule(rules, rule, message) -> str:
-        if rule in rules:
-            return check_rule(rules, rules[rule], message)
-
-        if rule.isnumeric():
-            return check_rule(rules, rules[int(rule)], message)
-
-        if '|' in rule:
-            return list(itertools.chain(*[check_rule(rules, part, message) for part in rule.split(' | ')]))
-
-        if ' ' in rule:
-            tokens = rule.split(' ')
-
-            result = [message]
-            for token in tokens:
-                result = list(itertools.chain(*[check_rule(rules, token, r) for r in result]))
-                if not result:
-                    break
-
-            return result
-
-        return [message[1:]] if len(message) > 0 and rule[1] == message[0] else []
-
-
-    return sum(1 for message in messages if '' in check_rule(rules, '0', message))
+    return sum(1 for message in messages if '' in rules[0].parse(rules, message))
 
 
 def solution_for_first_part(task_input: str) -> int:
@@ -88,8 +103,8 @@ print("Solution for the first part:", solution_for_first_part(task_input))
 def solution_for_second_part(task_input):
     rules, messages = parse(task_input)
 
-    rules[8] = '42 | 42 8'
-    rules[11] = '42 31 | 42 11 31'
+    rules[8] = parse_rule('42 | 42 8')
+    rules[11] = parse_rule('42 31 | 42 11 31')
 
     return count_valid_message(rules, messages)
 
