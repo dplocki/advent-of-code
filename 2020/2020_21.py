@@ -13,12 +13,10 @@ def parse(task_input: [str]):
         yield ingri.split(), alergen[:-1].split(', ')
 
 
-def solution_for_first_part(task_input):
-    foods = list(parse(task_input))
-
+def analyze_food(task_input: [str]) -> tuple:
     ingredients_counter = {}
     suspecting_allergens = {}
-    for ingredients, allergens in foods:
+    for ingredients, allergens in parse(task_input):
         for allergen in allergens:
             if allergen in suspecting_allergens:
                 suspecting_allergens[allergen] &= set(ingredients)
@@ -38,6 +36,12 @@ def solution_for_first_part(task_input):
         discovered[discover_allergen] = discovere_ingredient
         for allergen, ingredients in suspecting_allergens.items():
             suspecting_allergens[allergen].discard(discovere_ingredient)
+
+    return discovered, ingredients_counter
+
+
+def solution_for_first_part(task_input):
+    discovered, ingredients_counter = analyze_food(task_input)
  
     return sum(how_much for ingredient, how_much in ingredients_counter.items() if ingredient not in discovered.values())
 
@@ -51,5 +55,14 @@ assert solution_for_first_part(example_input) == 5
 
 # The input is taken from: https://adventofcode.com/2020/day/21/input
 task_input = list(load_input_file('input.21.txt'))
-result = solution_for_first_part(task_input)
-print("Solution for the first part:", result)
+print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input):
+    discovered, _ = analyze_food(task_input)
+
+    return ','.join(discovered[name] for name in sorted(discovered.keys()))
+
+
+assert solution_for_second_part(example_input) == 'mxmxvkd,sqjhc,fvjkl'
+print("Solution for the second part:", solution_for_second_part(task_input))
