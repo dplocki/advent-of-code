@@ -38,5 +38,25 @@ assert solution_for_first_part(example_input) == 150
 
 # The input is taken from: https://adventofcode.com/2021/day/2/input
 task_input = list(parse(load_input_file('input.02.txt')))
-result = solution_for_first_part(task_input)
-print("Solution for the first part:", result)
+print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(instructions: List[Tuple[str, int]]) -> int:
+    depth = 0
+    aim = 0
+    horizontal = 0
+
+    for where, howMuch in instructions:
+        if where == 'forward':
+            horizontal += howMuch
+            depth += aim * howMuch
+        if where == 'down':
+            aim += howMuch
+        if where == 'up':
+            aim -= howMuch
+
+    return depth * horizontal
+
+
+assert solution_for_second_part(example_input) == 900
+print("Solution for the second part:", solution_for_second_part(task_input))
