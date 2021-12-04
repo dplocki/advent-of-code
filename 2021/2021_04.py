@@ -76,3 +76,25 @@ assert solution_for_first_part(example_input) == 4512
 # The input is taken from: https://adventofcode.com/2021/day/4/input
 task_input = load_input_file('input.04.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input):
+    draw_numbers, boards = parse(task_input)
+    already_won = set()
+
+    for current_number in draw_numbers:
+        for board in boards:
+            board.mark_number(current_number)
+
+            if board.has_line() and board not in already_won:
+                if len(already_won) == len(boards) - 1:
+                    return current_number * board.score()
+
+                already_won.add(board)
+
+    raise Exception('Something goes wrong')
+
+
+assert solution_for_second_part(example_input) == 1924
+
+print("Solution for the second part:", solution_for_second_part(task_input))
