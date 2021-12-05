@@ -1,3 +1,4 @@
+from typing import List
 import re
 import itertools
 import os
@@ -14,12 +15,12 @@ def load_input_file(file_name: str) -> str:
         return file.read().strip()
 
 
-def load_input_file(file_name: str) -> [str]:
+def load_input_file(file_name: str) -> List[str]:
     with open(file_name) as file:
         yield from (line.strip() for line in file)
 
 
-def parse(task_input: [str]):
+def parse(task_input: List[str]):
     for line in task_input:
         pass
 
