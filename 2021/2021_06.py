@@ -10,27 +10,42 @@ def parse(task_input: List[str]):
     return map(int, task_input.split(','))
 
 
-def solution_for_first_part(task_input):
-    fishes = list(parse(task_input))
+def lanternfish_symulator(task_input: str, simulation_run: int) -> int:
+    initial_population = list(parse(task_input))
 
-    for _ in range(80):
-        new_fishes = []
-        for fish in fishes:
-            if fish == 0:
-                new_fishes.append(6)
-                new_fishes.append(8)
-            else:
-                new_fishes.append(fish - 1)
+    population = {}
+    for timer in initial_population:
+        population[timer] = population.get(timer, 0) + 1
 
-        fishes = new_fishes
+    for _ in range(simulation_run):
+        new_population = {(timer -1):count for timer, count in population.items()}
 
-    return len(new_fishes)
+        if -1 in new_population:
+            new_population[8] = new_population[-1]
+            new_population[6] = new_population.get(6, 0) + new_population[-1]
+            new_population[-1] = 0
+
+        population = new_population
+
+    return sum(v for v in population.values())
 
 
-example_input = '''3,4,3,1,2'''
+def solution_for_first_part(task_input: List[str]) -> int:
+    return lanternfish_symulator(task_input, 80)
 
+
+example_input = '3,4,3,1,2'
 assert solution_for_first_part(example_input) == 5934
 
 # The input is taken from: https://adventofcode.com/2021/day/6/input
 task_input = load_input_file('input.06.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: List[str]) -> int:
+    return lanternfish_symulator(task_input, 256)
+
+
+assert solution_for_second_part(example_input) == 26984457539
+
+print("Solution for the second part:", solution_for_second_part(task_input))
