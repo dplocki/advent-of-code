@@ -1,6 +1,10 @@
 from typing import List
 
 
+MAXIUM_LIFE_SPAN = 8
+RESET_TO_VALUE = 6
+
+
 def load_input_file(file_name: str) -> str:
     with open(file_name) as file:
         return file.read().strip()
@@ -13,16 +17,14 @@ def parse(task_input: List[str]):
 def lanternfish_symulator(task_input: str, simulation_run: int) -> int:
     initial_population = list(parse(task_input))
 
-    population = {}
-    for timer in initial_population:
-        population[timer] = population.get(timer, 0) + 1
+    population = {timer:initial_population.count(timer) for timer in range(MAXIUM_LIFE_SPAN)}
 
     for _ in range(simulation_run):
-        new_population = {(timer -1):count for timer, count in population.items()}
+        new_population = {(timer - 1):count for timer, count in population.items()}
 
         if -1 in new_population:
-            new_population[8] = new_population[-1]
-            new_population[6] = new_population.get(6, 0) + new_population[-1]
+            new_population[MAXIUM_LIFE_SPAN] = new_population[-1]
+            new_population[RESET_TO_VALUE] = new_population.get(RESET_TO_VALUE, 0) + new_population[-1]
             new_population[-1] = 0
 
         population = new_population
