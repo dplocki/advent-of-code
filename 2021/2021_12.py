@@ -19,7 +19,7 @@ def is_cave_big(cave: str) -> bool:
     return cave.isupper()
 
 
-def solution_for_first_part(task_input: list[tuple[str, str]]) -> int:
+def path_counter(task_input: list[tuple[str, str]], can_visit_cave: callable) -> int:
 
 
     def get_neighbors(caves_map: list[tuple[str, str]], from_where: str) -> list[str]:
@@ -39,12 +39,17 @@ def solution_for_first_part(task_input: list[tuple[str, str]]) -> int:
             continue
 
         for neighborn in get_neighbors(caves_map, current_place):
-            if is_cave_big(neighborn) or neighborn not in current_path:
-                p = current_path.copy()
-                p.append(neighborn)
-                paths_to_analise.append(p)
+            if can_visit_cave(neighborn, current_path):
+                new_path = current_path.copy()
+                new_path.append(neighborn)
+                paths_to_analise.append(new_path)
 
     return result
+
+
+def solution_for_first_part(task_input: list[tuple[str, str]]) -> int:
+    visit_small_only_once = lambda cave, current_path: is_cave_big(cave) or cave not in current_path
+    return path_counter(task_input, visit_small_only_once)
 
 
 example_input_first = '''start-A
@@ -92,3 +97,25 @@ assert solution_for_first_part(example_input_third) == 226
 # The input is taken from: https://adventofcode.com/2021/day/12/input
 task_input = list(load_input_file('input.12.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: list[tuple[str, str]]) -> int:
+
+
+    def can_visit_again(cave: str, current_path: list[str]) -> bool:
+        if cave not in current_path:
+            return True
+
+        only_small = [c for c in current_path if not is_cave_big(c)]
+        return len(only_small) == len(set(only_small))
+
+
+    visit_small_only_once_with_except = lambda cave, current_path: is_cave_big(cave) or can_visit_again(cave, current_path)
+    return path_counter(task_input, visit_small_only_once_with_except)
+
+
+assert solution_for_second_part(example_input_first) == 36
+assert solution_for_second_part(example_input_second) == 103
+assert solution_for_second_part(example_input_third) == 3509
+
+print("Solution for the second part:", solution_for_second_part(task_input))
