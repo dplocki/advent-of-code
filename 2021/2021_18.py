@@ -1,4 +1,5 @@
 import functools
+from itertools import permutations
 import math
 from typing import Any
 
@@ -137,8 +138,18 @@ example_input = '''[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 [[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]'''.splitlines()
 
 
-assert solution_for_first_part(example_input) ==  4140
+assert solution_for_first_part(example_input) == 4140
 
 # The input is taken from: https://adventofcode.com/2021/day/18/input
 task_input = list(load_input_file('input.18.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input):
+    snailfish_numbers = list(map(lambda line: list(parse(line)), task_input))
+
+    return max(calculate_magnitute(snailfish_sum(a, b)) for a, b in permutations(snailfish_numbers, 2))
+
+
+assert solution_for_second_part(example_input) == 3993
+print("Solution for the second part:", solution_for_second_part(task_input))
