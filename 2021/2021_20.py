@@ -31,7 +31,7 @@ def get_eight_neighbors(x: int, y: int) -> list[tuple[int, int]]:
     yield (x - 1, y - 1) # NW
 
 
-def en(enhance: list[str], image: dict[tuple[int, int], str], is_background_light: str) -> dict[tuple[int, int], str]:
+def enhance_image(enhance: list[str], image: dict[tuple[int, int], str], is_background_light: str) -> dict[tuple[int, int], str]:
     xs = [x for x, _ in image]
     ys = [y for _, y in image]
     
@@ -64,8 +64,8 @@ def en(enhance: list[str], image: dict[tuple[int, int], str], is_background_ligh
 def solution_for_first_part(task_input: str) -> int:
     enhance, image = parse(task_input)
 
-    image = en(enhance, image, False)
-    image = en(enhance, image, enhance[0])
+    image = enhance_image(enhance, image, False)
+    image = enhance_image(enhance, image, enhance[0])
 
     return len(image)
 
@@ -83,3 +83,17 @@ assert solution_for_first_part(example_input) == 35
 # The input is taken from: https://adventofcode.com/2021/day/20/input
 task_input = load_input_file('input.20.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: str) -> int:
+    enhance, image = parse(task_input)
+
+    for _ in range(25):
+        image = enhance_image(enhance, image, False)
+        image = enhance_image(enhance, image, enhance[0])
+
+    return len(image)
+
+
+assert solution_for_second_part(example_input) == 3351
+print("Solution for the second part:", solution_for_second_part(task_input))
