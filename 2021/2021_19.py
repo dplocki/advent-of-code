@@ -5,6 +5,7 @@ from typing import Callable
 REQUIRED_BECON_OVERLAP = 12
 X, Y, Z = 0, 1, 2
 
+
 def load_input_file(file_name: str) -> str:
     with open(file_name) as file:
         return file.read().strip()
@@ -38,78 +39,80 @@ class BeconDistance():
         return self.distances == other.distances
 
 
-def match_from(points, distances):
-    for p1 in points:
-        curent_distances = set(BeconDistance(p1, p2) for p2 in points if p1 != p2)
-        if curent_distances == distances:
-            return p1
-
-    raise Exception('Unable to find the matching point')
+def find_all_beacons(task_input: list[str]) -> list[tuple[int, int, int]]:
 
 
-def transform_point(transformation_matrix: dict[tuple[int, int], int], point: tuple[int, int, int]) -> tuple[int, int, int]:
-    result = [0, 0, 0, 0]
-    vector = [*point, 1]
+    def transform_point(transformation_matrix: dict[tuple[int, int], int], point: tuple[int, int, int]) -> tuple[int, int, int]:
+        result = [0, 0, 0, 0]
+        vector = [*point, 1]
 
-    for y in range(0, 4):
-        for x in range(0, 4):
-            result[y] += transformation_matrix[x, y] * vector[x]
+        for y in range(0, 4):
+            for x in range(0, 4):
+                result[y] += transformation_matrix[x, y] * vector[x]
 
-    return result[X], result[Y], result[Z]
-
-
-def calculate_transform_function(points: list[tuple[tuple[int, int, int], tuple[int, int, int]]]) -> Callable:
-    A_POINT, B_POINT = 0, 1
-    FIRST_PAIR, SECOND_PAIR = 0, 1
+        return result[X], result[Y], result[Z]
 
 
-    def calculate_multiplayer(sa_p1: int, sb_p1: int, sa_p2: int, sb_p2: int) -> int:
-        if (sa_p1 > sa_p2 and sb_p1 > sb_p2) or (sa_p1 < sa_p2 and sb_p1 < sb_p2):
-            return 1
+    def match_from(points, distances):
+        for p1 in points:
+            curent_distances = set(BeconDistance(p1, p2) for p2 in points if p1 != p2)
+            if curent_distances == distances:
+                return p1
 
-        if (sa_p1 > sa_p2 and sb_p1 < sb_p2) or (sa_p1 < sa_p2 and sb_p1 > sb_p2):
-            return -1
-
-        raise Exception('two points on equal coordinates')
+        raise Exception('Unable to find the matching point')
 
 
-    def make_transformation_matrix(x_index, y_index, z_index):
-        result_matrix = {(x,y):0 for x in range(4) for y in range(4)}
-        result_matrix[3, 3] = 1
+    def calculate_transform_function(points: list[tuple[tuple[int, int, int], tuple[int, int, int]]]) -> Callable:
+        A_POINT, B_POINT = 0, 1
+        FIRST_PAIR, SECOND_PAIR = 0, 1
 
-        result_matrix[x_index, X] = calculate_multiplayer(points[FIRST_PAIR][A_POINT][X], points[FIRST_PAIR][B_POINT][x_index], points[SECOND_PAIR][A_POINT][X], points[SECOND_PAIR][B_POINT][x_index])
-        result_matrix[y_index, Y] = calculate_multiplayer(points[FIRST_PAIR][A_POINT][Y], points[FIRST_PAIR][B_POINT][y_index], points[SECOND_PAIR][A_POINT][Y], points[SECOND_PAIR][B_POINT][y_index])
-        result_matrix[z_index, Z] = calculate_multiplayer(points[FIRST_PAIR][A_POINT][Z], points[FIRST_PAIR][B_POINT][z_index], points[SECOND_PAIR][A_POINT][Z], points[SECOND_PAIR][B_POINT][z_index])
 
-        result_matrix[3, X] = points[FIRST_PAIR][A_POINT][X] - result_matrix[x_index, X] * points[FIRST_PAIR][B_POINT][x_index]
-        result_matrix[3, Y] = points[FIRST_PAIR][A_POINT][Y] - result_matrix[y_index, Y] * points[FIRST_PAIR][B_POINT][y_index]
-        result_matrix[3, Z] = points[FIRST_PAIR][A_POINT][Z] - result_matrix[z_index, Z] * points[FIRST_PAIR][B_POINT][z_index]
+        def calculate_multiplayer(sa_p1: int, sb_p1: int, sa_p2: int, sb_p2: int) -> int:
+            if (sa_p1 > sa_p2 and sb_p1 > sb_p2) or (sa_p1 < sa_p2 and sb_p1 < sb_p2):
+                return 1
+
+            if (sa_p1 > sa_p2 and sb_p1 < sb_p2) or (sa_p1 < sa_p2 and sb_p1 > sb_p2):
+                return -1
+
+            raise Exception('two points on equal coordinates')
+
+
+        def make_transformation_matrix(x_index, y_index, z_index):
+            result_matrix = {(x,y):0 for x in range(4) for y in range(4)}
+            result_matrix[3, 3] = 1
+
+            result_matrix[x_index, X] = calculate_multiplayer(points[FIRST_PAIR][A_POINT][X], points[FIRST_PAIR][B_POINT][x_index], points[SECOND_PAIR][A_POINT][X], points[SECOND_PAIR][B_POINT][x_index])
+            result_matrix[y_index, Y] = calculate_multiplayer(points[FIRST_PAIR][A_POINT][Y], points[FIRST_PAIR][B_POINT][y_index], points[SECOND_PAIR][A_POINT][Y], points[SECOND_PAIR][B_POINT][y_index])
+            result_matrix[z_index, Z] = calculate_multiplayer(points[FIRST_PAIR][A_POINT][Z], points[FIRST_PAIR][B_POINT][z_index], points[SECOND_PAIR][A_POINT][Z], points[SECOND_PAIR][B_POINT][z_index])
+
+            result_matrix[3, X] = points[FIRST_PAIR][A_POINT][X] - result_matrix[x_index, X] * points[FIRST_PAIR][B_POINT][x_index]
+            result_matrix[3, Y] = points[FIRST_PAIR][A_POINT][Y] - result_matrix[y_index, Y] * points[FIRST_PAIR][B_POINT][y_index]
+            result_matrix[3, Z] = points[FIRST_PAIR][A_POINT][Z] - result_matrix[z_index, Z] * points[FIRST_PAIR][B_POINT][z_index]
+
+            return result_matrix
+
+        global distance
+
+        x, y, z = distance(points[FIRST_PAIR][A_POINT], points[SECOND_PAIR][A_POINT])
+
+        if distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (x, y, z):
+            result_matrix = make_transformation_matrix(X, Y, Z)
+        elif distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (y, z, x):
+            result_matrix = make_transformation_matrix(Z, X, Y)
+        elif distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (y, x, z):
+            result_matrix = make_transformation_matrix(Y, X, Z)
+        elif distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (z, x, y):
+            result_matrix = make_transformation_matrix(Y, Z, X)
+        elif distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (x, z, y):
+            result_matrix = make_transformation_matrix(X, Z, Y)
+        elif distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (z, y, x):
+            result_matrix = make_transformation_matrix(Z, Y, X)
+
+        assert transform_point(result_matrix, points[FIRST_PAIR][B_POINT]) == points[FIRST_PAIR][A_POINT]
+        assert transform_point(result_matrix, points[SECOND_PAIR][B_POINT]) == points[SECOND_PAIR][A_POINT]
 
         return result_matrix
 
-
-    x, y, z = distance(points[FIRST_PAIR][A_POINT], points[SECOND_PAIR][A_POINT])
-
-    if distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (x, y, z):
-        result_matrix = make_transformation_matrix(X, Y, Z)
-    elif distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (y, z, x):
-        result_matrix = make_transformation_matrix(Z, X, Y)
-    elif distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (y, x, z):
-        result_matrix = make_transformation_matrix(Y, X, Z)
-    elif distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (z, x, y):
-        result_matrix = make_transformation_matrix(Y, Z, X)
-    elif distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (x, z, y):
-        result_matrix = make_transformation_matrix(X, Z, Y)
-    elif distance(points[FIRST_PAIR][B_POINT], points[SECOND_PAIR][B_POINT]) == (z, y, x):
-        result_matrix = make_transformation_matrix(Z, Y, X)
-
-    assert transform_point(result_matrix, points[FIRST_PAIR][B_POINT]) == points[FIRST_PAIR][A_POINT]
-    assert transform_point(result_matrix, points[SECOND_PAIR][B_POINT]) == points[SECOND_PAIR][A_POINT]
-
-    return result_matrix
-
-
-def solution_for_first_part(task_input: list[str]) -> int:
 
     def only_overlapping_points(commons_points, scanners_points_distances):
         result = set()
@@ -155,6 +158,7 @@ def solution_for_first_part(task_input: list[str]) -> int:
     all_beacons = set(becon for becon in scanners[0])
     all_beacons_distances = set()
     all_beacons_distances.update(scanners_points_distances[0])
+    scanners_from_0 = [(0, 0, 0)]
 
     for scanner_number in scanners_order:
         commons_points = all_beacons_distances & scanners_points_distances[scanner_number]
@@ -176,6 +180,13 @@ def solution_for_first_part(task_input: list[str]) -> int:
             distance.points = [transform_point(translation_matrix, point) for point in distance.points]
             all_beacons_distances.add(distance)
 
+        scanners_from_0.append(transform_point(translation_matrix, (0, 0, 0)))
+
+
+    return all_beacons, scanners_from_0
+
+
+def solution_for_first_part(all_beacons: list[tuple[int, int, int]]) -> int:
     return len(all_beacons)
 
 
@@ -316,8 +327,17 @@ example_input = '''--- scanner 0 ---
 -652,-548,-490
 30,-46,-14'''
 
-assert solution_for_first_part(example_input) == 79
+all_example_beacons, all_example_scanners = find_all_beacons(example_input)
+assert solution_for_first_part(all_example_beacons) == 79
 
 # The input is taken from: https://adventofcode.com/2021/day/19/input
-task_input = load_input_file('input.19.txt')
-print("Solution for the first part:", solution_for_first_part(task_input))
+all_input_beacons, all_input_scanners = find_all_beacons(load_input_file('input.19.txt'))
+print("Solution for the first part:", solution_for_first_part(all_input_beacons))
+
+
+def solution_for_second_part(all_scanners: list[tuple[int, int, int]]) -> int:
+    return max(sum(distance(a, b)) for a, b in combinations(all_scanners, 2))
+
+
+assert solution_for_second_part(all_example_scanners) == 3621
+print("Solution for the second part:", solution_for_second_part(all_input_scanners))
