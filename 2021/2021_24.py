@@ -1,5 +1,6 @@
 import math
 import itertools
+from statistics import variance
 
 
 def load_input_file(file_name: str) -> list[str]:
@@ -47,7 +48,7 @@ def run_program(lines, input_gen, x=0, y=0, z=0):
     return registers
 
 
-def solution_for_first_part(task_input):
+def load_variables(task_input):
     instructions = list(parse(task_input))
 
     instructions_per_digit = []
@@ -58,19 +59,23 @@ def solution_for_first_part(task_input):
 
         current_digit.append(instruction)
 
-    variables = [(instructions[4][2], instructions[5][2], instructions[15][2]) for instructions in instructions_per_digit]
+    return [(instructions[4][2], instructions[5][2], instructions[15][2]) for instructions in instructions_per_digit]
 
-    digit = None
-    result = None
-    for product in itertools.product(range(9, 0, -1), repeat=7):
-        digit_provider = iter(product)
+
+def check_all_combinations(task_input, digits_collections: list[int]) -> str:
+    variables = load_variables(task_input)
+
+    for digits_collection in digits_collections:
+        digit_provider = iter(digits_collection)
         result = []
         z = 0
         for p1, p2, p3 in variables:
+            digit = None
             if p2 < 0:
                 digit = z % 26 + p2
                 if digit > 9 or digit < 1:
                     continue
+
                 z //= p1
             else:
                 digit = next(digit_provider)
@@ -81,6 +86,20 @@ def solution_for_first_part(task_input):
         if z == 0:
             return ''.join(map(str, result))
 
+    raise Exception('Not found')
+
+
+def solution_for_first_part(task_input):
+    return check_all_combinations(task_input, itertools.product(range(9, 0, -1), repeat=7))
+
+
 # The input is taken from: https://adventofcode.com/2021/day/24/input
 task_input = list(load_input_file('input.24.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input):
+    return check_all_combinations(task_input, itertools.product(range(1, 10), repeat=7))
+
+
+print("Solution for the second part:", solution_for_second_part(task_input))
