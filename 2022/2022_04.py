@@ -1,5 +1,5 @@
 import re
-from typing import Generator, Iterator, List, Tuple
+from typing import Callable, Generator, Iterator, List, Tuple
 
 
 def load_input_file(file_name: str) -> List[str]:
@@ -16,7 +16,7 @@ def parse(task_input: List[str]) -> Generator[Tuple[int, int, int, int], None, N
         yield tuple(map(int, (groups[g + 1] for g in range(NUMBERS_TO_PARSE))))
 
 
-def solution_for_first_part(task_input: Iterator[str]) -> int:
+def solution(task_input: Iterator[str], is_fitting: Callable[[set, set], bool]) -> int:
     lines = parse(task_input)
 
     result = 0
@@ -24,10 +24,14 @@ def solution_for_first_part(task_input: Iterator[str]) -> int:
         first_elf_range = set(range(elf_1_start, elf_1_end + 1)) 
         second_elf_range = set(range(elf_2_start, elf_2_end + 1))
 
-        if first_elf_range <= second_elf_range or second_elf_range <= first_elf_range:
+        if is_fitting(first_elf_range, second_elf_range):
             result += 1
 
     return result
+
+
+def solution_for_first_part(task_input: Iterator[str]) -> int:
+    return solution(task_input, lambda first_elf_range, second_elf_range: first_elf_range <= second_elf_range or second_elf_range <= first_elf_range)
 
 
 example_input = '''2-4,6-8
@@ -42,3 +46,11 @@ assert solution_for_first_part(example_input) == 2
 # The input is taken from: https://adventofcode.com/2022/day/4/input
 task_input = list(load_input_file('input.04.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterator[str]) -> int:
+    return solution(task_input, lambda first_elf_range, second_elf_range: not first_elf_range.isdisjoint(second_elf_range))
+
+
+assert solution_for_second_part(example_input) == 4
+print("Solution for the second part:", solution_for_second_part(task_input))
