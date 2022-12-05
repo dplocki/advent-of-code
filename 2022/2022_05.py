@@ -1,4 +1,4 @@
-from typing import Dict, Generator, Iterable, List, Tuple
+from typing import Callable, Dict, Generator, Iterable, List, Tuple
 import re
 
 
@@ -32,16 +32,24 @@ def parse(task_input: List[str]) -> Tuple[Dict[int, List[str]]]:
     return stacks, instructions.splitlines()
 
 
-def solution_for_first_part(task_input: str) -> str:
+def solution(task_input: str, run_crane: Callable[[Dict[int, List[str]], int, int, int], None]) -> str:
     stacks, instructions = parse(task_input)
     stacks = {k:list(reversed(v)) for k, v in stacks.items()}
 
     for how_many, _from, _to in parse_line(instructions):
-        for _ in range(how_many):
-            container = stacks[_from].pop()
-            stacks[_to].append(container)
+        run_crane(stacks, how_many, _from, _to)
 
     return ''.join(stacks[index].pop() for index in sorted(stacks.keys()))
+
+
+def solution_for_first_part(task_input: str) -> str:
+
+    def internal(stacks, how_many, start, end):
+        for _ in range(how_many):
+            container = stacks[start].pop()
+            stacks[end].append(container)
+
+    return solution(task_input, internal)
 
 
 example_input = '''    [D]    
@@ -59,3 +67,19 @@ assert solution_for_first_part(example_input) == 'CMZ'
 # The input is taken from: https://adventofcode.com/2022/day/5/input
 task_input = load_input_file('input.05.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: str) -> str:
+
+    def internal(stacks, how_many, start, end):
+        to_moved = [stacks[start].pop() for _ in range(how_many)]
+        to_moved.reverse()
+
+        for container in to_moved:
+            stacks[end].append(container)
+
+    return solution(task_input, internal)
+
+
+assert solution_for_second_part(example_input) == 'MCD'
+print("Solution for the second part:", solution_for_second_part(task_input))
