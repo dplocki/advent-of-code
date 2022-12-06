@@ -12,17 +12,17 @@ def addToClipBoard(text) -> None:
 
 def load_input_file(file_name: str) -> str:
     with open(file_name) as file:
-        return file.read().strip()
+        return file.read().rstrip()
 
 
 def load_input_file(file_name: str) -> List[str]:
     with open(file_name) as file:
-        yield from (line.strip() for line in file)
+        yield from (line.rstrip() for line in file)
 
 
 def parse(task_input: List[str]):
     for line in task_input:
-        pass
+        line
 
     return
 
