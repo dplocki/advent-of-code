@@ -1,4 +1,4 @@
-from typing import List
+from typing import Generator, Iterable, List
 import re
 import itertools
 import os
@@ -15,19 +15,19 @@ def load_input_file(file_name: str) -> str:
         return file.read().rstrip()
 
 
-def load_input_file(file_name: str) -> List[str]:
+def load_input_file(file_name: str) -> Generator[str, None, None]:
     with open(file_name) as file:
         yield from (line.rstrip() for line in file)
 
 
-def parse(task_input: List[str]):
+def parse(task_input: Iterable[str]):
     for line in task_input:
         line
 
     return
 
 
-def solution_for_first_part(task_input):
+def solution_for_first_part(task_input: Iterable[str]) -> int:
     lines = list(parse(task_input))
 
 
