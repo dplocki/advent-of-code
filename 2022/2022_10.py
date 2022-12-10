@@ -187,3 +187,25 @@ assert solution_for_first_part(example_input) == 13140
 # The input is taken from: https://adventofcode.com/2022/day/10/input
 task_input = list(load_input_file('input.10.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> None:
+    SCREEN_WIDTH = 40
+    SCREEN_HEIGHT = 6
+
+    screen = {}
+    for cycle, x_value in run_program(parse(task_input)):
+        column = (cycle - 1) % SCREEN_WIDTH
+        row = (cycle - 1) // SCREEN_WIDTH
+
+        screen[column, row] = '#' if abs(x_value - column) <= 1 else '.'
+
+    for row in range(SCREEN_HEIGHT):
+        for column in range(SCREEN_WIDTH):
+            print(screen[column, row], end='')
+
+        print()
+
+
+print("Solution for the second part:")
+solution_for_second_part(task_input)
