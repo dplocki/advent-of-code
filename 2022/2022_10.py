@@ -32,7 +32,7 @@ def solution_for_first_part(task_input: Iterable[str]) -> int:
     return sum(
         x_value * cycle
         for cycle, x_value in run_program(parse(task_input))
-        if ((cycle - 20) % 40) == 0)
+        if cycle % 40 == 20)
 
 
 example_input = '''addx 15
