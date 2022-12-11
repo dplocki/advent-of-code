@@ -1,4 +1,5 @@
-from typing import Generator, Iterable, Tuple
+from functools import reduce
+from typing import Dict, Generator, Iterable, List, Tuple
 from collections import deque
 
 
@@ -23,12 +24,8 @@ def parse(task_input: str) -> Generator[Tuple, None, None]:
         in_case_of_true = int(lines[4].split()[-1])
         in_case_of_false = int(lines[5].split()[-1])
 
-        yield (id, starting_items, operation, operation_value1, operation_value2, test_value, in_case_of_true, in_case_of_false)
-
-
-def solution_for_first_part(task_input: Iterable[str]) -> int:
-    monkeys_data = [
-        {
+        yield {
+            'id': id,
             'items': deque(starting_items),
             'operation': eval(f"lambda old: {operation_value1} {operation} {operation_value2}"),
             'test_value': test_value,
@@ -37,8 +34,14 @@ def solution_for_first_part(task_input: Iterable[str]) -> int:
             'inspects': 0
         }
 
-        for _, starting_items, operation, operation_value1, operation_value2, test_value, in_case_of_true, in_case_of_false in parse(task_input)
-    ]
+
+def monkey_business_level(monkeys_data: List[Dict]) -> int:
+    sorted_monkeys_inspects = sorted(monkey['inspects'] for monkey in monkeys_data)
+    return sorted_monkeys_inspects[-1] * sorted_monkeys_inspects[-2]
+
+
+def solution_for_first_part(task_input: str) -> int:
+    monkeys_data = list(parse(task_input))
 
     for _ in range(20):
         for monkey in monkeys_data:
@@ -54,8 +57,7 @@ def solution_for_first_part(task_input: Iterable[str]) -> int:
                     else 'in_case_of_false'
                 ]]['items'].append(item)
 
-    sorted_monkeys_inspects = sorted(monkey['inspects'] for monkey in monkeys_data)
-    return sorted_monkeys_inspects[-1] * sorted_monkeys_inspects[-2]
+    return monkey_business_level(monkeys_data)
 
 
 example_input = '''Monkey 0:
@@ -91,3 +93,28 @@ assert solution_for_first_part(example_input) == 10605
 # The input is taken from: https://adventofcode.com/2022/day/11/input
 task_input = load_input_file('input.11.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: str) -> int:
+    monkeys_data = list(parse(task_input))
+    lcm = reduce(lambda prev, current: prev * current['test_value'], monkeys_data, 1)
+
+    for _ in range(10_000):
+        for monkey in monkeys_data:
+            while monkey['items']:
+                monkey['inspects'] += 1
+                
+                old = monkey['items'].popleft()
+                item = monkey['operation'](old) % lcm
+
+                monkeys_data[monkey[
+                    'in_case_of_true'
+                    if item % monkey['test_value'] == 0
+                    else 'in_case_of_false'
+                ]]['items'].append(item)
+
+    return monkey_business_level(monkeys_data)
+
+
+assert solution_for_second_part(example_input) == 2713310158
+print("Solution for the second part:", solution_for_second_part(task_input))
