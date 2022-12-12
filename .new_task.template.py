@@ -55,6 +55,24 @@ def visualization(point_dictionary):
 
         print()
 
-
+# 4 - direction
+# [(0, -1), (1, 0), (-1, 0), (0, 1)]
 # 8 - direction
 # [(-1, -1), (0, -1), (1, -1), (-1, 0),  (1, 0), (-1, 1), (0, 1), (1, 1)]
+
+def bfs(_map, get_neighbors, start, end):
+    to_check = collections.deque([start])
+    cost_so_far = {start:0}
+
+    while to_check:
+        column_index, row_index = to_check.pop()
+
+        if (column_index, row_index) == end:
+            return cost_so_far[end]
+
+        for new_point in get_neighbors(_map, column_index, row_index):
+            new_cost = cost_so_far[column_index, row_index] + 1
+
+            if new_point not in cost_so_far or new_cost < cost_so_far[new_point]:
+                cost_so_far[new_point] = new_cost
+                to_check.appendleft(new_point)
