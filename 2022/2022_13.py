@@ -1,3 +1,5 @@
+from functools import cmp_to_key
+from itertools import chain
 from typing import Generator, Iterable, List, Tuple, Union
 
 
@@ -78,3 +80,26 @@ assert solution_for_first_part(example_input) == 13
 # The input is taken from: https://adventofcode.com/2022/day/13/input
 task_input = load_input_file('input.13.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    ADDITIONAL_PACKETS = [
+        [[2]],
+        [[6]]
+    ]
+
+    pairs = parse(task_input)
+    packets = list(chain(*pairs))
+    packets.extend(ADDITIONAL_PACKETS)
+
+    packets.sort(key=cmp_to_key(are_correct_order))
+
+    result = 1
+    for packet in ADDITIONAL_PACKETS:
+        result *= packets.index(packet) + 1
+
+    return result
+
+
+assert solution_for_second_part(example_input) == 140
+print("Solution for the second part:", solution_for_second_part(task_input))
