@@ -62,7 +62,8 @@ def visualization(point_dictionary):
 
 def bfs(_map, get_neighbors, start, end):
     to_check = collections.deque([start])
-    cost_so_far = {start:0}
+    cost_so_far = dict()
+    cost_so_far[start] = 0
 
     while to_check:
         column_index, row_index = to_check.pop()
