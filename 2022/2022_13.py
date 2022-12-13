@@ -9,9 +9,11 @@ def load_input_file(file_name: str) -> str:
 
 
 def parse(task_input: Iterable[str]) -> Generator[Tuple[List, List], None, None]:
+    import json
+
     for lines in task_input.split('\n\n'):
         left, right = lines.splitlines()
-        yield eval(left), eval(right)
+        yield json.loads(left), json.loads(right)
 
 
 def are_correct_order(left: Union[int, List], right: Union[int, List]) -> int:
@@ -91,7 +93,6 @@ def solution_for_second_part(task_input: Iterable[str]) -> int:
     pairs = parse(task_input)
     packets = list(chain(*pairs))
     packets.extend(ADDITIONAL_PACKETS)
-
     packets.sort(key=cmp_to_key(are_correct_order))
 
     result = 1
