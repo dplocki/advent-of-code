@@ -87,3 +87,21 @@ assert solution_for_first_part(example_input) == 24
 # The input is taken from: https://adventofcode.com/2022/day/14/input
 task_input = list(load_input_file('input.14.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    cave_map = build_map(parse(task_input))
+    bottom = max(y for _, y in cave_map.keys()) + 1
+
+    sand = 1
+    while True:
+        x, y = sand_sim(cave_map, bottom)
+        if (x, y) == (500, 0):
+            return sand
+        else:
+            cave_map[x, y] = 's'
+            sand += 1
+
+
+assert solution_for_second_part(example_input) == 93
+print("Solution for the second part:", solution_for_second_part(task_input))
