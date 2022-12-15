@@ -61,3 +61,37 @@ assert solution_for_first_part(example_input, 10) == 26
 # The input is taken from: https://adventofcode.com/2022/day/15/input
 task_input = list(load_input_file('input.15.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input, 2_000_000))
+
+
+def solution_for_second_part(task_input: Iterable[str], max_range: int) -> int:
+    lines = list(parse(task_input))
+
+    for y in range(max_range + 1):
+        ranges = []
+        for sensor_x, sensor_y, beacon_x, beacon_y in lines:
+            distance = manhattan_distance(sensor_x, sensor_y, beacon_x, beacon_y)
+
+            dist = distance - abs(sensor_y - y)
+            if dist <= 0:
+                continue
+
+            x1 = sensor_x - dist
+            x2 = sensor_x + dist
+
+            ranges.append((x1, x2))
+
+        ranges.sort()
+        
+        prev_end = ranges[0][1]
+        for start_x, end_x in ranges[1:]:
+            distance_to_last_range = start_x - prev_end
+            if distance_to_last_range < 0:
+                prev_end = max(end_x, prev_end)
+            elif distance_to_last_range == 2:
+                return (prev_end + 1) * 4_000_000 + y
+            else:
+                prev_end = end_x
+
+
+assert solution_for_second_part(example_input, 40) == 56000011
+print("Solution for the second part:", solution_for_second_part(task_input, 4_000_000))
