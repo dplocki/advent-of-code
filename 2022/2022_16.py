@@ -1,4 +1,5 @@
 import collections
+import itertools
 import re
 from typing import Dict, Generator, Iterable, List, Tuple
 
@@ -38,9 +39,30 @@ def shortest_path(leads: Dict[str, List[str]], start: str, end: str) -> int:
                 to_check.appendleft(new_point)
 
 
-def generate_all_paths(cave_map: Dict[str, Dict[str, int]], flow_rates: Dict[str, int]) -> Generator[Dict[str, int], None, None]:
+def build_cave_map(task_input: Iterable[str]) -> Tuple[Dict[str, Dict[str, int]], Dict[str, int]]:
+    tunnel_leads = {}
+    flow_rates = {}
+
+    for valve, flow, tunnels in parse(task_input):
+        tunnel_leads[valve] = tunnels
+        flow_rates[valve] = flow
+
+    cave_map = {
+        start:{
+            end:shortest_path(tunnel_leads, start, end)
+            for end in tunnel_leads.keys()
+            if start != end
+        }
+
+        for start in tunnel_leads.keys()
+    }
+
+    return cave_map, flow_rates
+
+
+def generate_all_paths(start_time: int, cave_map: Dict[str, Dict[str, int]], flow_rates: Dict[str, int]) -> Generator[Dict[str, int], None, None]:
     possibilities = collections.deque()
-    possibilities.append(('AA', 0, {}))
+    possibilities.append(('AA', start_time, {}))
 
     non_zero_values = [k for k,v in flow_rates.items() if v > 0]
 
@@ -66,26 +88,11 @@ def generate_all_paths(cave_map: Dict[str, Dict[str, int]], flow_rates: Dict[str
 
 
 def solution_for_first_part(task_input: Iterable[str]) -> int:
-    tunnel_leads = {}
-    flow_rates = {}
-
-    for valve, flow, tunnels in parse(task_input):
-        tunnel_leads[valve] = tunnels
-        flow_rates[valve] = flow
-
-    cave_map = {
-        start:{
-            end:shortest_path(tunnel_leads, start, end)
-            for end in tunnel_leads.keys()
-            if start != end
-        }
-
-        for start in tunnel_leads.keys()
-    }
+    cave_map, flow_rates = build_cave_map(task_input)
 
     return max(
-            calculate_pressure_release(flow_rates, solution)
-            for solution in generate_all_paths(cave_map, flow_rates))
+        calculate_pressure_release(flow_rates, solution)
+        for solution in generate_all_paths(0, cave_map, flow_rates))
 
 
 example_input = '''Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
@@ -99,7 +106,33 @@ Valve HH has flow rate=22; tunnel leads to valve GG
 Valve II has flow rate=0; tunnels lead to valves AA, JJ
 Valve JJ has flow rate=21; tunnel leads to valve II'''.splitlines()
 
-assert solution_for_first_part(example_input) == 1651
+#assert solution_for_first_part(example_input) == 1651
 # The input is taken from: https://adventofcode.com/2022/day/16/input
 task_input = list(load_input_file('input.16.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    cave_map, flow_rates = build_cave_map(task_input)
+    non_zero_values = [k for k,v in flow_rates.items() if v > 0]
+
+    solutions = {}
+
+    for valves_state in generate_all_paths(4, cave_map, flow_rates):
+        valves_state_hash = 0
+        m = 1
+        for key in non_zero_values:
+            if valves_state.get(key, 0) != 0:
+                valves_state_hash += m
+            m *= 2
+
+        result_for_valves_state = calculate_pressure_release(flow_rates, valves_state)
+        solutions[valves_state_hash] = max(solutions.get(valves_state_hash, 0), result_for_valves_state)
+
+    return max(solutions[n] + solutions[m]
+        for n, m in itertools.combinations(solutions, 2)
+        if n & m == 0)
+
+
+assert solution_for_second_part(example_input) == 1707
+print("Solution for the second part:", solution_for_second_part(task_input))
