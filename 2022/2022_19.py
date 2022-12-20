@@ -99,9 +99,17 @@ def find_the_best_geoids(ore_robot_cost_ore: int, clay_robot_cost_ore: int, obsi
 
 
 def solution_for_first_part(task_input: Iterable[str]) -> int:
-    return sum(
-        id * max(find_the_best_geoids(ore_robot_cost_ore, clay_robot_cost_ore, obsidian_robot_cost_ore, obsidian_robot_cost_clay, geode_robot_cost_ore, geode_robot_cost_obsidian))
-        for id, ore_robot_cost_ore, clay_robot_cost_ore, obsidian_robot_cost_ore, obsidian_robot_cost_clay, geode_robot_cost_ore, geode_robot_cost_obsidian in parse(task_input))
+    r = 0
+
+    for id, ore_robot_cost_ore, clay_robot_cost_ore, obsidian_robot_cost_ore, obsidian_robot_cost_clay, geode_robot_cost_ore, geode_robot_cost_obsidian in parse(task_input):
+        x = max(find_the_best_geoids(ore_robot_cost_ore, clay_robot_cost_ore, obsidian_robot_cost_ore, obsidian_robot_cost_clay, geode_robot_cost_ore, geode_robot_cost_obsidian))
+        r += id * x
+        print(id, x)
+
+    return r
+    # return sum(
+    #     id * max(find_the_best_geoids(ore_robot_cost_ore, clay_robot_cost_ore, obsidian_robot_cost_ore, obsidian_robot_cost_clay, geode_robot_cost_ore, geode_robot_cost_obsidian))
+    #     )
 
 
 example_input = '''Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.
