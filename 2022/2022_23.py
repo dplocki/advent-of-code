@@ -1,3 +1,4 @@
+from itertools import count
 from typing import Generator, Iterable, Set, Tuple
 
 
@@ -30,12 +31,12 @@ def parse(task_input: Iterable[str]) -> Set[Tuple[int, int]]:
             if c == '#')
 
 
-def solution_for_first_part(task_input: Iterable[str]) -> int:
+def simulation(task_input: Iterable[str]) -> Set[Tuple[int, int]]:
     current_elves = parse(task_input)
     validation_direction_generator = validation_direction()
     will_be_occupied = {} # where elf will be moved -> where elf is now
 
-    for _ in range(10):
+    while True:
         new_elves = set()
         directions = [d for d, _ in zip(validation_direction_generator, range(4))]
 
@@ -62,7 +63,14 @@ def solution_for_first_part(task_input: Iterable[str]) -> int:
 
                 break
 
-        current_elves = new_elves            
+        current_elves = new_elves
+        yield current_elves
+
+
+def solution_for_first_part(task_input: Iterable[str]) -> int:
+    
+    for current_elves, _ in zip(simulation(task_input), range(10)):
+        pass
 
     xs = [x for _, x in current_elves]
     ys = [y for y, _ in current_elves]
@@ -86,3 +94,16 @@ assert solution_for_first_part(example_input) == 110
 # The input is taken from: https://adventofcode.com/2022/day/23/input
 task_input = list(load_input_file('input.23.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    previous_current_elves = set()
+    for current_elves, turn in zip(simulation(task_input), count(1)):
+        if previous_current_elves == current_elves:
+            return turn
+        else:
+            previous_current_elves = current_elves
+
+
+assert solution_for_second_part(example_input) == 20
+print("Solution for the second part:", solution_for_second_part(task_input))
