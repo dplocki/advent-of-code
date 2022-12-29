@@ -28,6 +28,10 @@ def find_the_best_geoids(ore_robot_cost_ore: int, clay_robot_cost_ore: int, obsi
     todo = [(0,  0, 0, 0, 0,  1, 0, 0, 0)]
     seen = set()
 
+    max_ore_robots = max(ore_robot_cost_ore, clay_robot_cost_ore, obsidian_robot_cost_ore, geode_robot_cost_ore)
+    max_clay_robots = obsidian_robot_cost_clay
+    max_obsidian_robots = geode_robot_cost_obsidian
+
     while todo:
         time, ore, clay, obsidian, geode, ore_robots, clay_robots, obsidian_robots, geode_robots = todo.pop()
         if time > 24 or (ore, clay, obsidian, geode, ore_robots, clay_robots, obsidian_robots, geode_robots) in seen:
@@ -38,7 +42,7 @@ def find_the_best_geoids(ore_robot_cost_ore: int, clay_robot_cost_ore: int, obsi
         yield geode + (24 - time) * geode_robots
 
         # ore robot
-        if ore_robots < 5:
+        if ore_robots < max_ore_robots:
             time_to_purchase = calculate_time_to_purchase(ore, ore_robots, ore_robot_cost_ore)
             todo.append((
                 time + time_to_purchase,
@@ -52,7 +56,7 @@ def find_the_best_geoids(ore_robot_cost_ore: int, clay_robot_cost_ore: int, obsi
             ))
 
         # clay robot
-        if ore_robots < 10:
+        if clay_robots < max_clay_robots:
             time_to_purchase = calculate_time_to_purchase(ore, ore_robots, clay_robot_cost_ore)
             todo.append((
                 time + time_to_purchase,
@@ -66,7 +70,7 @@ def find_the_best_geoids(ore_robot_cost_ore: int, clay_robot_cost_ore: int, obsi
             ))
 
         # obsidian robot
-        if clay_robots > 0:
+        if clay_robots > 0 and obsidian_robots < max_obsidian_robots:
             time_to_purchase = max(
                 calculate_time_to_purchase(ore, ore_robots, obsidian_robot_cost_ore),
                 calculate_time_to_purchase(clay, clay_robots, obsidian_robot_cost_clay))
@@ -99,17 +103,9 @@ def find_the_best_geoids(ore_robot_cost_ore: int, clay_robot_cost_ore: int, obsi
 
 
 def solution_for_first_part(task_input: Iterable[str]) -> int:
-    r = 0
-
-    for id, ore_robot_cost_ore, clay_robot_cost_ore, obsidian_robot_cost_ore, obsidian_robot_cost_clay, geode_robot_cost_ore, geode_robot_cost_obsidian in parse(task_input):
-        x = max(find_the_best_geoids(ore_robot_cost_ore, clay_robot_cost_ore, obsidian_robot_cost_ore, obsidian_robot_cost_clay, geode_robot_cost_ore, geode_robot_cost_obsidian))
-        r += id * x
-        print(id, x)
-
-    return r
-    # return sum(
-    #     id * max(find_the_best_geoids(ore_robot_cost_ore, clay_robot_cost_ore, obsidian_robot_cost_ore, obsidian_robot_cost_clay, geode_robot_cost_ore, geode_robot_cost_obsidian))
-    #     )
+    return sum(
+        id * max(find_the_best_geoids(ore_robot_cost_ore, clay_robot_cost_ore, obsidian_robot_cost_ore, obsidian_robot_cost_clay, geode_robot_cost_ore, geode_robot_cost_obsidian))
+        for id, ore_robot_cost_ore, clay_robot_cost_ore, obsidian_robot_cost_ore, obsidian_robot_cost_clay, geode_robot_cost_ore, geode_robot_cost_obsidian in parse(task_input))
 
 
 example_input = '''Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.
