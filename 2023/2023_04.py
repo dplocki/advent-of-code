@@ -34,3 +34,19 @@ assert solution_for_first_part(example_input) == 13
 # The input is taken from: https://adventofcode.com/2023/day/4/input
 task_input = list(load_input_file('input.04.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    cards = {index + 1: card for index, card in enumerate(parse(task_input)) }
+    cards_number = { card: 1 for card in cards.keys() }
+
+    for current_card_index, (winning, numbers) in cards.items():
+        matched_numbers_count = len(winning.intersection(numbers))
+
+        for next_card in range(current_card_index + 1, current_card_index + 1 + matched_numbers_count):
+            cards_number[next_card] += cards_number.get(current_card_index, 0)
+
+    return sum(cards_number.values())
+
+
+print("Solution for the second part:", solution_for_second_part(task_input))
