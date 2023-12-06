@@ -1,6 +1,7 @@
 from functools import reduce
 from operator import mul
 from typing import Tuple
+from math import floor, ceil
 
 
 def load_input_file(file_name: str) -> str:
@@ -13,12 +14,12 @@ def parse_for_first_task(task_input: str) -> Tuple[int, int]:
 
 
 def find_how_many_wins(race_time: int, record_distance: int) -> int:
-    return sum(1 for _ in filter(
-        lambda reached_distance: reached_distance > record_distance,
-        map(
-            lambda test_holding_button_time: (race_time - test_holding_button_time) * test_holding_button_time,
-            range(1, race_time)
-        )))
+    part_under_the_square = (race_time ** 2 - 4 * record_distance) ** 0.5
+
+    t1 = ceil((race_time + part_under_the_square) / 2)
+    t2 = floor((race_time - part_under_the_square) / 2)
+
+    return t1 - t2 - 1
 
 
 def solution_for_first_part(task_input: str) -> int:
