@@ -20,7 +20,7 @@ def parse(task_input: Iterable[str]) -> Set[tuple[int, int]]:
         if character == '#')
 
 
-def solution_for_first_part(task_input: Iterable[str]) -> int:
+def solution(task_input: Iterable[str], multiplayer: int) -> int:
     stars = parse(task_input)
     star = next(iter(stars))
     minimal_row = maximal_row = star[0]
@@ -41,13 +41,17 @@ def solution_for_first_part(task_input: Iterable[str]) -> int:
 
     extended_stars_map = set()
     for star in stars:
-        row_modification = sum(1 for r in rows_to_extend if r < star[0])
-        column_modification = sum(1 for c in columns_to_extend if c < star[1])
+        row_modification = sum(1 for r in rows_to_extend if r < star[0]) * (multiplayer - 1)
+        column_modification = sum(1 for c in columns_to_extend if c < star[1]) * (multiplayer - 1)
         extended_stars_map.add((star[0] + row_modification, star[1] + column_modification))
 
     return sum(
         abs(star_a[0] - star_b[0]) + abs(star_a[1] - star_b[1])
         for star_a, star_b in itertools.combinations(extended_stars_map, 2))
+
+
+def solution_for_first_part(task_input: Iterable[str]) -> int:
+    return solution(task_input, 2)
 
 
 example_input = '''...#......
@@ -66,3 +70,13 @@ assert solution_for_first_part(example_input) == 374
 # The input is taken from: https://adventofcode.com/2023/day/11/input
 task_input = list(load_input_file('input.11.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    return solution(task_input, 1_000_000)
+
+
+assert solution(example_input, 10) == 1030
+assert solution(example_input, 100) == 8410
+
+print("Solution for the second part:", solution_for_second_part(task_input))
