@@ -14,7 +14,8 @@ def parse(task_input: Iterable[str]) -> Generator[Tuple[str, Tuple[int, ...]], N
         yield tokens[0], tuple(map(int, tokens[1].split(',')))
 
 
-def count_arrangements(line, numbers):
+@cache
+def count_arrangements(line: str, numbers: Tuple[int, ...]) -> int:
     if len(numbers) == 0:
         return 0 if '#' in line else 1
 
@@ -56,3 +57,13 @@ assert solution_for_first_part(example_input) == 21
 # The input is taken from: https://adventofcode.com/2023/day/12/input
 task_input = list(load_input_file('input.12.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    return sum(
+        count_arrangements('?'.join( (row,) * 5), groups * 5)
+        for row, groups in parse(task_input))
+
+
+assert solution_for_second_part(example_input) == 525152
+print("Solution for the first part:", solution_for_second_part(task_input))
