@@ -1,4 +1,4 @@
-from typing import Dict, Generator, Iterable, List, Tuple
+from typing import Callable, Dict, Generator, Iterable, Tuple
 from heapq import heappop, heappush
 
 
@@ -16,11 +16,12 @@ def parse(task_input: Iterable[str]) -> Dict[Tuple[int, int], int]:
             for column_index, character in enumerate(line)}
 
 
-def heuristic(current_point: tuple[int, int], target: tuple[int, int]) -> int:
-    return abs(current_point[0] - target[0]) + abs(current_point[1] - target[1])
+def find_crucible_path_cost(
+        crucible_ability_test: Callable[[Tuple[int, int], Tuple[int, int], int], bool],
+        heat_loss_map: Dict[Tuple[int, int], int],
+        start: Tuple[int, int],
+        end: Tuple[int, int]) -> int:
 
-
-def find_crucible_path_cost(heat_loss_map: Dict[Tuple[int, int], int], start: Tuple[int, int], end: Tuple[int, int]) -> int:
     visited = set()
     possibilities = []
     for direction in DIRECTIONS:
@@ -48,14 +49,14 @@ def find_crucible_path_cost(heat_loss_map: Dict[Tuple[int, int], int], start: Tu
                 continue
 
             new_direction_counter = (direction_counter + 1) if last_direction == direction else 1
-            if new_direction_counter > 3:
+            if crucible_ability_test(last_direction, direction, direction_counter, new_direction_counter):
                 continue
 
             new_cost = heat_loss_map[next_point] + cost
             heappush(possibilities, (new_cost, next_point, direction, new_direction_counter))
 
 
-def solution_for_first_part(task_input: Iterable[str]) -> int:
+def solution(task_input: Iterable[str], crucible_ability_test: Callable[[Tuple[int, int], Tuple[int, int], int], bool]) -> int:
     heat_loss_map = parse(task_input)
 
     simple = next(iter(heat_loss_map))
@@ -66,7 +67,15 @@ def solution_for_first_part(task_input: Iterable[str]) -> int:
         row_maxim = max(row_maxim, row_index)
         column_maxim = max(column_maxim, column_index)
 
-    return find_crucible_path_cost(heat_loss_map, (0, 0), (row_maxim, column_maxim))
+    return find_crucible_path_cost(crucible_ability_test, heat_loss_map, (0, 0), (row_maxim, column_maxim))
+
+
+def solution_for_first_part(task_input: Iterable[str]) -> int:
+
+    def internal(last_direction , direction, direction_counter, new_direction_counter):
+        return new_direction_counter > 3
+
+    return solution(task_input, internal)
 
 
 example_input = '''2413432311323
@@ -88,3 +97,15 @@ assert solution_for_first_part(example_input) == 102
 # The input is taken from: https://adventofcode.com/2023/day/17/input
 task_input = list(load_input_file('input.17.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+
+    def internal(last_direction, direction, direction_counter, new_direction_counter):
+        return (last_direction != direction and direction_counter < 4) or new_direction_counter > 10
+
+    return solution(task_input, internal)
+
+
+assert solution_for_second_part(example_input) == 94
+print("Solution for the second part:", solution_for_second_part(task_input))
