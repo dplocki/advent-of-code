@@ -30,12 +30,10 @@ def find_all_internal(digger_map: Set[Tuple[int, int]], start: Tuple[int, int]) 
 
 
 def solution_for_first_part(task_input: Iterable[str]) -> int:
-    dig_plan = list(parse(task_input))
-
     digger_map = set()
     point = 0,0
 
-    for where, how_long, _ in dig_plan:
+    for where, how_long, _ in parse(task_input):
         if where == 'R':
             direction = 0, 1
         elif where == 'L':
@@ -74,3 +72,34 @@ assert solution_for_first_part(example_input) == 62
 # The input is taken from: https://adventofcode.com/2023/day/18/input
 task_input = list(load_input_file('input.18.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    point = 0, 0
+    result = 0
+    permitter = 0
+
+    for where, how_long, color in parse(task_input):
+        how_long = int(color[2:][:-2], 16)
+        where = color[-2]
+
+        if where == '0':
+            direction = 0, 1
+        elif where == '2':
+            direction = 0, -1
+        elif where == '1':
+            direction = 1, 0
+        elif where == '3':
+            direction = -1, 0
+
+        new_point = point[0] + direction[0] * how_long, point[1] + direction[1] * how_long
+        result += (point[1] * new_point[0]) - (point[0] * new_point[1])
+        point = new_point
+        permitter += how_long
+
+    return result // 2 + permitter // 2 + 1
+
+
+assert solution_for_second_part(example_input) == 952408144115
+
+print("Solution for the second part:", solution_for_second_part(task_input))
