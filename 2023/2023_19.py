@@ -1,3 +1,5 @@
+from functools import reduce
+from operator import mul
 from typing import Dict, Generator, Iterable, List, Tuple
 
 
@@ -23,8 +25,8 @@ def parse(task_input: str) -> Tuple[Dict[str, Tuple], Tuple[int, int, int, int]]
     def parse_instructions(raw_instructions: str) -> Generator[Tuple[str, Tuple], None, None]:
         for i in raw_instructions.splitlines():
             tokens = i.split('{')
-            name = tokens[0]
             instruction_tokens = tokens[1][:-1].split(',')
+
             yield tokens[0], tuple(map(parse_instruction, instruction_tokens))
 
 
@@ -93,3 +95,69 @@ assert solution_for_first_part(example_input) == 19114
 # The input is taken from: https://adventofcode.com/2023/day/19/input
 task_input = load_input_file('input.19.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def count_valid_combinations(instructions_collection: Dict[str, Tuple], where: str, parameters: Dict[str, Tuple[int, int]], index: int) -> int:
+    if where == 'A':
+        return reduce(mul, (_to - _from + 1 for _from, _to in parameters.values()))
+
+    if where == 'R':
+        return 0
+
+    instruction = instructions_collection[where][index]
+    if instruction[0] == '>':
+
+        if instruction[2] < parameters[instruction[1]][0]:
+            return count_valid_combinations(instructions_collection, instruction[3], parameters_copy, 0)
+
+        if instruction[2] > parameters[instruction[1]][1]:
+            return 0
+
+        parameters_copy = parameters.copy()
+        parameters_copy[instruction[1]] = parameters[instruction[1]][0], instruction[2]
+        a = count_valid_combinations(instructions_collection, where, parameters_copy, index + 1)
+
+        parameters_copy[instruction[1]] = instruction[2] + 1, parameters[instruction[1]][1]
+        b = count_valid_combinations(instructions_collection, instruction[3], parameters_copy, 0)
+
+        return a + b
+
+    elif instruction[0] == '<':
+
+        if instruction[2] < parameters[instruction[1]][0]:
+            return 0
+
+        if instruction[2] > parameters[instruction[1]][1]:
+            return count_valid_combinations(instructions_collection, instruction[3], parameters_copy, 0)
+
+        parameters_copy = parameters.copy()
+        parameters_copy[instruction[1]] = parameters[instruction[1]][0], instruction[2] - 1
+        a = count_valid_combinations(instructions_collection, instruction[3], parameters_copy, 0)
+
+        parameters_copy[instruction[1]] = instruction[2], parameters[instruction[1]][1]
+        b = count_valid_combinations(instructions_collection, where, parameters_copy, index + 1)
+
+        return a + b
+
+    elif instruction[0] == '=':
+
+        return count_valid_combinations(instructions_collection, instruction[1], parameters, 0)
+
+
+    raise Exception(f'Incorrect instruction: {instruction}')
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    instructions, _ = parse(task_input)
+
+    return count_valid_combinations(instructions, 'in', {
+            'x': (1, 4000),
+            'm': (1, 4000),
+            'a': (1, 4000),
+            's': (1, 4000),
+        }, 0)
+
+
+assert solution_for_second_part(example_input) == 167409079868000
+
+print("Solution for the second part:", solution_for_second_part(task_input))
