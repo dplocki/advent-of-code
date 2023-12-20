@@ -1,5 +1,6 @@
 from collections import deque
 from itertools import count
+from math import lcm
 from typing import Generator, Iterable, List, Tuple
 
 
@@ -38,13 +39,13 @@ def run(task_input: Iterable[str]) -> Generator[Tuple, None, None]:
                 conjunctions[conjunction][name] = False
 
     for pressed_button_count in count(1):
-        yield 'button pressed', pressed_button_count, None
+        yield 'button pressed', pressed_button_count, None, None
 
         events = deque([('broadcaster', False, 'button')])
 
         while events:
             where, impulse, source = events.popleft()
-            yield 'event', where, impulse
+            yield 'event', where, impulse, source
 
             if where == 'broadcaster':
                 events.extend((output, impulse, where) for output in modules[where])
@@ -64,7 +65,7 @@ def solution_for_first_part(task_input: List[str]) -> int:
     high_impulse_count, low_impulse_count = 0, 0
     pressed_button_count = 0
 
-    for event_type, where, impulse in run(task_input):
+    for event_type, where, impulse, _ in run(task_input):
         if event_type == 'button pressed':
             pressed_button_count = where
             if pressed_button_count > 1000:
@@ -101,3 +102,29 @@ assert solution_for_first_part(example_input_2) == 11687500
 # The input is taken from: https://adventofcode.com/2023/day/20/input
 task_input = list(load_input_file('input.20.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: List[str]) -> int:
+    result = {}
+    pressed_button_count = None
+    point_of_interest = None
+
+    for event_type, where, impulse, source in run(task_input):
+        if event_type == 'button pressed':
+            pressed_button_count = where
+        elif event_type == 'event':
+            if where == 'rx':
+                point_of_interest = source
+            elif where == point_of_interest and impulse:
+                if source not in result:
+                    result[source] = []
+
+                result[source].append(pressed_button_count)
+
+                if all(len(train) > 1 for train in result.values()):
+                    break
+
+    return lcm(*tuple(points[1] - points[0] for points in result.values()))
+
+
+print("Solution for the second part:", solution_for_second_part(task_input))
