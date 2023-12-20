@@ -55,8 +55,25 @@ def visualization(point_dictionary):
 
         print()
 
+
+def visualization(point_dictionary):
+    rows = [row for row, column in point_dictionary.keys()]
+    columns = [column for row, column in point_dictionary.keys()]
+    max_rows = max(rows)
+    max_columns = max(columns)
+    min_rows = min(rows)
+    min_columns = min(columns)
+
+    for row in range(min_rows, max_rows + 1):
+        for column in range(min_columns, max_columns + 1):
+            print(point_dictionary[row, column], end='')
+
+        print()
+
+
 # 4 - direction
 # [(0, -1), (1, 0), (-1, 0), (0, 1)]
+
 # 8 - direction
 # [(-1, -1), (0, -1), (1, -1), (-1, 0),  (1, 0), (-1, 1), (0, 1), (1, 1)]
 
