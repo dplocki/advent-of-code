@@ -110,3 +110,35 @@ assert solution_for_first_part(example_input) == 5
 # The input is taken from: https://adventofcode.com/2023/day/22/input
 task_input = list(load_input_file('input.22.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def count_supported_by(brick_supported_by: Dict[int, set], index: int) -> int:
+    falling = set([index])
+    previous = 0
+
+    while previous != len(falling):
+        previous = len(falling)
+
+        for i in brick_supported_by:
+            if not brick_supported_by[i]:
+                continue
+
+            if len(brick_supported_by[i] - falling) == 0:
+                falling.add(i)
+
+    return len(falling) - 1
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    sorted_bricks = [(index, clean_brick) for index, clean_brick in (sorted(enumerate(map(clean_bricks, parse(task_input))), key=sort_function, reverse=True))]
+    bricks = simulate_felling_down(sorted_bricks)
+
+    brick_supported_by = {}
+    for current_index, current_brick in bricks:
+        brick_supported_by[current_index] = set(index for index, brick in bricks if brick[Z] + brick[SIZE_Z] == current_brick[Z] and are_bricks_intersected_in_z_axis(current_brick, brick))
+
+    return sum(count_supported_by(brick_supported_by, index) for index in brick_supported_by if is_the_only_support(brick_supported_by, index))
+
+
+assert solution_for_second_part(example_input) == 7
+print("Solution for the second part:", solution_for_second_part(task_input))
