@@ -49,7 +49,7 @@ def find_the_longest_path(get_all_neighbors: Callable[[Dict[Tuple[int, int], str
     cost_so_far[start] = 0
 
     while to_check:
-        row_index, column_index, path = to_check.pop()
+        row_index, column_index, path = to_check.popleft()
 
         if (row_index, column_index) == end:
             continue
@@ -113,7 +113,7 @@ print("Solution for the first part:", solution_for_first_part(task_input))
 
 
 def find_the_shortest_path_with_blockades(get_all_neighbors: Callable[[Dict[Tuple[int, int], str]], Iterable[Tuple[int, int]]], hiking_map: Dict[Tuple[int, int], str], start: Tuple[int, int], end: Tuple[int, int], blockades: Set[Tuple[int, int]]) -> int:
-    to_check = collections.deque([start])
+    to_check = [start]
     cost_so_far = dict()
     cost_so_far[start] = 0
 
@@ -131,7 +131,7 @@ def find_the_shortest_path_with_blockades(get_all_neighbors: Callable[[Dict[Tupl
 
             if new_point not in cost_so_far or new_cost < cost_so_far[new_point]:
                 cost_so_far[new_point] = new_cost
-                to_check.appendleft(new_point)
+                to_check.append(new_point)
 
 
 def build_graph(hiking_map, start: Dict[Tuple[int, int], str], end: Tuple[int, int]) -> Dict[Tuple[int, int], Dict[Tuple[int, int], int]]:
@@ -164,7 +164,7 @@ def build_graph(hiking_map, start: Dict[Tuple[int, int], str], end: Tuple[int, i
 
 
 def find_the_longest_path_by_graph(graph: Dict[Tuple[int, int], Dict[Tuple[int, int], int]], start: Tuple[int, int], end: Tuple[int, int]) -> int:
-    to_check = collections.deque([(start, 0, set() )])
+    to_check = [(start, 0, set() )]
     path_sizes = []
 
     while to_check:
@@ -180,7 +180,7 @@ def find_the_longest_path_by_graph(graph: Dict[Tuple[int, int], Dict[Tuple[int, 
             if new_point in path:
                 continue
 
-            to_check.appendleft((new_point, size + graph[point][new_point], copy_path))
+            to_check.append((new_point, size + graph[point][new_point], copy_path))
 
     return max(path_sizes)
 
