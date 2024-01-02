@@ -83,7 +83,7 @@ def find_location_of_stone_in_2d(hailstones: Iterable[Tuple[int, int, int, int, 
                 continue
 
             if all(
-                    abs((potential_rock_location[0] - hailstone[X]) * hailstone[DELTA_Y] - (potential_rock_location[1] - hailstone[Y]) * hailstone[DELTA_X]) < 0.0001
+                    abs((potential_rock_location[0] - hailstone[X]) * hailstone[DELTA_Y] == (potential_rock_location[1] - hailstone[Y]) * hailstone[DELTA_X])
                     for hailstone in new_hailstones
                 ):
 
