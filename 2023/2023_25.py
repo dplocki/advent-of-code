@@ -37,10 +37,6 @@ def solution_for_first_part(task_input: Iterable[str]) -> int:
         for neighbor in neighbors:
             edges.add(tuple(sorted((node, neighbor))))
 
-    vertex_numeric = {}
-    for i, neighbors in enumerate(vertexes):
-        vertex_numeric[neighbors] = i
-
     G = Graph()
     for node_a, node_b in edges:
         G.add_edge(node_a, node_b)
