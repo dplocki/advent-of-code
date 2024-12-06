@@ -11,18 +11,20 @@ def load_input_file(file_name: str) -> Generator[str, None, None]:
         yield from (line.rstrip() for line in file)
 
 
-def parse(task_input: Iterable[str]) -> Generator[tuple[int, int], None, None]:
-    for line in task_input:
-        yield tuple(map(int, line.split()))
-
-
-def solution_for_first_part(task_input: Iterable[str]) -> int:
+def parse(task_input: Iterable[str]) -> tuple[Iterable[int], Iterable[int]]:
     lefts = []
     rights = []
 
-    for left, right in parse(task_input):
-        lefts.append(left)
-        rights.append(right)
+    for line in task_input:
+        tokens = tuple(map(int, line.split()))
+        lefts.append(tokens[0])
+        rights.append(tokens[1])
+
+    return lefts, rights
+
+
+def solution_for_first_part(task_input: Iterable[str]) -> int:
+    lefts, rights = parse(task_input)
 
     lefts.sort()
     rights.sort()
@@ -43,3 +45,15 @@ assert solution_for_first_part(example_input) == 11
 # The input is taken from: https://adventofcode.com/2024/day/1/input
 task_input = list(load_input_file('input.01.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    lefts, rights = parse(task_input)
+
+    return sum(
+        left * rights.count(left)
+        for left in lefts)
+
+
+assert solution_for_second_part(example_input) == 31
+print("Solution for the second part:", solution_for_second_part(task_input))
