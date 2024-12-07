@@ -1,4 +1,4 @@
-from typing import Set, Tuple
+from typing import Iterable, Set, Tuple, Union
 
 
 def load_input_file(file_name: str) -> str:
@@ -20,13 +20,13 @@ def parse(task_input: str) -> Tuple[Set[Tuple[int, int]], Tuple[Tuple[int]]]:
     return order_rules, updates_pages
 
 
-def check_the_update_pages_list(order_rules: Set[Tuple[int, int]], update_pages: Tuple[Tuple[int]]) -> bool:
+def check_the_update_pages_list(order_rules: Set[Tuple[int, int]], update_pages: Tuple[Tuple[int]]) -> Union[int, None]:
     for index, value in enumerate(update_pages):
         for other_index in range(index, len(update_pages)):
             if (update_pages[other_index], value) in order_rules:
-                return False
+                return index
 
-    return True
+    return None
 
 
 def solution_for_first_part(task_input: str) -> int:
@@ -35,7 +35,7 @@ def solution_for_first_part(task_input: str) -> int:
     return sum(
         update_pages[len(update_pages) // 2]
         for update_pages in updates_pages
-        if check_the_update_pages_list(order_rules, update_pages))
+        if check_the_update_pages_list(order_rules, update_pages) == None)
 
 
 example_input = '''47|53
@@ -71,5 +71,52 @@ assert solution_for_first_part(example_input) == 143
 
 # The input is taken from: https://adventofcode.com/2024/day/5/input
 task_input = load_input_file('input.05.txt')
-result = solution_for_first_part(task_input)
-print("Solution for the first part:", result)
+print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def find_matching_index(order_rules: Set[Tuple[int, int]], update_pages: Tuple[Tuple[int]], number: int) -> int:
+    for index, value in enumerate(update_pages):
+        if (number, value) in order_rules:
+            return index
+
+    return len(update_pages)
+
+
+def fix_order_page_update_list(order_rules: Set[Tuple[int, int]], update_pages: Tuple[Tuple[int]]) -> Iterable[int]:
+    incorrect_values = []
+    only_correct_values = update_pages[:]
+
+    index = check_the_update_pages_list(order_rules, only_correct_values)
+
+    while index != None:
+        incorrect_values.append(only_correct_values[index])
+        only_correct_values = only_correct_values[:index] + only_correct_values[index + 1:]
+
+        index = check_the_update_pages_list(order_rules, only_correct_values)
+
+    result = only_correct_values[:]
+
+    for value_to_retry in incorrect_values:
+        index = find_matching_index(order_rules, result, value_to_retry)
+        result = list(result[:index]) + [value_to_retry] + list(result[index:])
+
+    return result
+
+
+def solution_for_second_part(task_input: str) -> int:
+    order_rules, updates_pages = parse(task_input)
+    result = 0
+
+    for update_pages in updates_pages:
+        incorrect_index = check_the_update_pages_list(order_rules, update_pages)
+        if incorrect_index == None:
+            continue
+
+        correct_page_update_list = fix_order_page_update_list(order_rules, update_pages)
+        result += correct_page_update_list[len(correct_page_update_list) // 2]
+
+    return result
+
+
+assert solution_for_second_part(example_input) == 123
+print("Solution for the second part:", solution_for_second_part(task_input))
