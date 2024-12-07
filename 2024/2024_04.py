@@ -52,3 +52,29 @@ assert solution_for_first_part(example_input) == 18
 # The input is taken from: https://adventofcode.com/2024/day/4/input
 task_input = list(load_input_file('input.04.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    letters_map = {(row, column): character for row, column, character in parse(task_input)}
+
+    max_rows = max(r for r, _ in letters_map.keys()) + 1
+    max_columns = max(c for _, c in letters_map.keys()) + 1
+
+    result = 0
+
+    for row in range(max_rows):
+        for column in range(max_columns):
+            if letters_map[row, column] != 'A':
+                continue
+
+            if ((letters_map.get((row - 1, column - 1), '') == 'M' and letters_map.get((row + 1, column + 1), '') == 'S') \
+                or (letters_map.get((row - 1, column - 1), '') == 'S' and letters_map.get((row + 1, column + 1), '') == 'M')) \
+                and (
+                (letters_map.get((row - 1, column + 1), '') == 'M' and letters_map.get((row + 1, column - 1), '') == 'S') \
+                or (letters_map.get((row - 1, column + 1), '') == 'S' and letters_map.get((row + 1, column - 1), '') == 'M')):
+                result += 1
+
+    return result
+
+
+print("Solution for the second part:", solution_for_second_part(task_input))
