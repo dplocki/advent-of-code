@@ -1,4 +1,4 @@
-from typing import Generator, Iterable, List, Tuple
+from typing import Callable, Generator, Iterable, List, Tuple
 
 
 def load_input_file(file_name: str) -> Generator[str, None, None]:
@@ -15,7 +15,7 @@ def parse(task_input: Iterable[str]) -> Generator[Tuple[int, Tuple[int, ...]], N
         yield result, numbers
 
 
-def is_valid(result: int, numbers: List[int]) -> bool:
+def is_valid_for_two_operators(result: int, numbers: List[int]) -> bool:
     if len(numbers) == 0:
         return result == 0
 
@@ -25,19 +25,23 @@ def is_valid(result: int, numbers: List[int]) -> bool:
     first = numbers[0]
     second = numbers[1]
 
-    if is_valid(result, [first * second] + numbers[2:]):
+    if is_valid_for_two_operators(result, [first * second] + numbers[2:]):
         return True
 
-    if is_valid(result, [first + second] + numbers[2:]):
+    if is_valid_for_two_operators(result, [first + second] + numbers[2:]):
         return True
 
     return False
 
 
-def solution_for_first_part(task_input: Iterable[str]) -> int:
+def solution(task_input: Iterable[str], is_valid: Callable[[int, List[int]], bool]) -> int:
     return sum(
         result if is_valid(result, list(numbers)) else 0
         for result, numbers in parse(task_input))
+
+
+def solution_for_first_part(task_input: Iterable[str]) -> int:
+    return solution(task_input, is_valid_for_two_operators)
 
 
 example_input = '''190: 10 19
@@ -55,3 +59,32 @@ assert solution_for_first_part(example_input) == 3749
 # The input is taken from: https://adventofcode.com/2024/day/7/input
 task_input = list(load_input_file('input.07.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def is_valid_for_second_operators(result: int, numbers: List[int]) -> bool:
+    if len(numbers) == 0:
+        return result == 0
+
+    if len(numbers) == 1:
+        return result == numbers[0]
+
+    first = numbers[0]
+    second = numbers[1]
+
+    if is_valid_for_second_operators(result, [first * second] + numbers[2:]):
+        return True
+
+    if is_valid_for_second_operators(result, [first + second] + numbers[2:]):
+        return True
+
+    if is_valid_for_second_operators(result, [int(str(first) + str(second))] + numbers[2:]):
+        return True
+
+    return False
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    return solution(task_input, is_valid_for_second_operators)
+
+
+print("Solution for the second part:", solution_for_second_part(task_input))
