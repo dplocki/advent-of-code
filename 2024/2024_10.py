@@ -1,4 +1,4 @@
-from typing import Dict, Generator, Iterable, Tuple
+from typing import Callable, Dict, Generator, Iterable, Tuple
 
 
 def load_input_file(file_name: str) -> Generator[str, None, None]:
@@ -18,7 +18,7 @@ def find_zero_positions(hiking_map: Dict[Tuple[int, int], int]) -> Generator[Tup
             yield row, column
 
 
-def get_path_score(hiking_map: Dict[Tuple[int, int], int], start_zero: Tuple[int, int]) -> int:
+def get_path_trailhead_score(hiking_map: Dict[Tuple[int, int], int], start_zero: Tuple[int, int]) -> int:
     to_check = [ start_zero ]
     result = set()
 
@@ -38,12 +38,16 @@ def get_path_score(hiking_map: Dict[Tuple[int, int], int], start_zero: Tuple[int
     return len(result)
 
 
-def solution_for_first_part(task_input: Iterable[str]) -> int:
+def solution(get_path_score: Callable[[Dict[Tuple[int, int], int]], int], task_input: Iterable[str]) -> int:
     hiking_map = {(row, column): value for row, column, value in parse(task_input)}
 
     return sum(
         get_path_score(hiking_map, zero_position)
         for zero_position in find_zero_positions(hiking_map))
+
+
+def solution_for_first_part(task_input: Iterable[str]) -> int:
+    return solution(get_path_trailhead_score, task_input)
 
 
 example_input = '''89010123
@@ -60,3 +64,31 @@ assert solution_for_first_part(example_input) == 36
 # The input is taken from: https://adventofcode.com/2024/day/10/input
 task_input = list(load_input_file('input.10.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def get_distinct_path_score(hiking_map: Dict[Tuple[int, int], int], start_zero: Tuple[int, int]) -> int:
+    to_check = [ start_zero ]
+    result = 0
+
+    while to_check:
+        current_position = to_check.pop()
+        current_value = hiking_map[current_position]
+
+        if current_value == 9:
+            result += 1
+            continue
+
+        for neighbor in ((0, -1), (1, 0), (-1, 0), (0, 1)):
+            new_position = current_position[0] + neighbor[0], current_position[1] + neighbor[1]
+            if hiking_map.get(new_position, None) == (current_value + 1):
+                to_check.append(new_position)
+
+    return result
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    return solution(get_distinct_path_score, task_input)
+
+
+assert solution_for_second_part(example_input) == 81
+print("Solution for the second part:", solution_for_second_part(task_input))
