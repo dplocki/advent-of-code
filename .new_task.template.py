@@ -21,8 +21,12 @@ def load_input_file(file_name: str) -> Generator[str, None, None]:
 
 
 def parse(task_input: Iterable[str]):
+    for row, line in enumerate(task_input):
+        for column, character in enumerate(line):
+            yield row, column, character
+
     for line in task_input:
-        line
+        for character in line:
 
     return
 
