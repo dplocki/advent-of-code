@@ -19,24 +19,19 @@ Prize: X=(\d+), Y=(\d+)
     )
 
 
-def find_all_matches(button_a_x: int, button_a_y: int, button_b_x: int, button_b_y: int, target_x: int, target_y: int) -> int:
-    MAX_STEP = 101
+def find_all_match(button_a_x: int, button_a_y: int, button_b_x: int, button_b_y: int, target_x: int, target_y: int) -> int:
+    b = (target_x * button_a_y - target_y * button_a_x) // (button_a_y * button_b_x - button_b_y * button_a_x)
+    a = (target_x * button_b_y - target_y * button_b_x) // (button_b_y * button_a_x - button_b_x * button_a_y)
 
-    for a in range(MAX_STEP):
-        for b in range(MAX_STEP):
-            reach_x = a * button_a_x + b * button_b_x
-            reach_y = a * button_a_y + b * button_b_y
-            price = a * 3 + b * 1
-
-            if reach_x == target_x and reach_y == target_y:
-                return price # apparently there is only one solution
+    if (a * button_a_x + b * button_b_x == target_x) and (a * button_a_y + b * button_b_y == target_y):
+        return a * 3 + b
 
     return 0
 
 
 def solution_for_first_part(task_input: Iterable[str]) -> int:
     return sum(
-        find_all_matches(*parameters)
+        find_all_match(*parameters)
         for parameters in parse(task_input))
 
 
@@ -61,3 +56,12 @@ assert solution_for_first_part(example_input) == 480
 # The input is taken from: https://adventofcode.com/2024/day/13/input
 task_input = load_input_file('input.13.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    return sum(
+        find_all_match(button_a_x, button_a_y, button_b_x, button_b_y, price_x + 10_000_000_000_000, price_y + 10_000_000_000_000)
+        for button_a_x, button_a_y, button_b_x, button_b_y, price_x, price_y in parse(task_input))
+
+
+print("Solution for the second part:", solution_for_second_part(task_input))
