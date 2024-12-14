@@ -1,3 +1,4 @@
+import itertools
 from typing import Generator, Iterable, Tuple
 import re
 
@@ -14,15 +15,22 @@ def parse(task_input: Iterable[str]) -> Generator[Tuple[int, int, int, int], Non
             yield tuple(map(int, group))
 
 
-def solution_for_first_part(task_input: Iterable[str], wide, tall) -> int:
+def simulation(task_input: Iterable[str], wide: int, tall: int) -> Generator[Generator[Tuple[int, int, int, int], None, None], None, None]:
     robots = {value for value in parse(task_input)}
 
-    for _ in range(100):
-        robots = (
-            ((position_x + speed_x) % wide, (position_y + speed_y) % tall, speed_x, speed_y)
-            for position_x, position_y, speed_x, speed_y in robots)
+    for second in itertools.count(0):
+        yield second, (
+            ((position_x + speed_x * second) % wide, (position_y + speed_y * second) % tall)
+            for position_x, position_y, speed_x, speed_y in robots
+        )
 
-    positions = [(x, y) for x, y, _, _ in robots]
+
+def solution_for_first_part(task_input: Iterable[str], wide: int, tall: int) -> int:
+    for second, robots in simulation(task_input, wide, tall):
+        if second == 100:
+            break
+
+    positions = list(robots)
 
     first_quatre = sum(1 for x, y in positions if x < wide // 2 and y < tall // 2)
     second_quatre = sum(1 for x, y in positions if x > wide // 2 and y < tall // 2)
@@ -50,3 +58,26 @@ assert solution_for_first_part(example_input, 11, 7) == 12
 # The input is taken from: https://adventofcode.com/2024/day/14/input
 task_input = list(load_input_file('input.14.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input, 101, 103))
+
+
+def solution_for_second_part(task_input: Iterable[str], wide, tall) -> int:
+    best_neighbors_count = 0
+    time_best_count = 0
+
+    for second, robots in simulation(task_input, wide, tall):
+        points = set(robots)
+        if second > wide * tall:
+            break
+
+        neighbors_count = sum(
+            ((x - 1, y ) in points) + ((x + 1, y) in points) + ((x, y - 1) in points) + ((x, y + 1) in points)
+            for x, y in points)
+
+        if neighbors_count > best_neighbors_count:
+            best_neighbors_count = neighbors_count
+            time_best_count = second
+
+    return time_best_count
+
+
+print("Solution for the second part:", solution_for_second_part(task_input, 101, 103))
