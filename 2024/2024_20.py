@@ -1,3 +1,4 @@
+from itertools import permutations
 from typing import Dict, Generator, Iterable, Tuple
 
 
@@ -48,34 +49,28 @@ def build_path_dictionary(maze: Dict[Tuple[int, int], str], start: Tuple[int, in
                 break
 
 
-def get_all_available_shortcuts(task_input: Iterable[str]) -> Dict[int, int]:
+def manhattan_distance(point_from: Tuple[int, int], point_to: Tuple[int, int]) -> int:
+    return abs(point_from[0] - point_to[0]) + abs(point_from[1] - point_to[1])
+
+
+def get_all_available_shortcuts(task_input: Iterable[str], maximum_distance: int) -> int:
     maze, begin, end = parse(task_input)
     visited = build_path_dictionary(maze, begin, end)
     result = {}
 
-    for point, type_of_tile in maze.items():
-        if type_of_tile != '#':
+    for from_point, to_point in permutations(visited.keys(), 2):
+        distance = manhattan_distance(from_point, to_point)
+        if distance > maximum_distance:
             continue
 
-        neighborA = point[0] - 1, point[1]
-        neighborB = point[0] + 1, point[1]
-
-        if neighborA in visited and neighborB in visited:
-            save = abs(visited[neighborA] - visited[neighborB]) - 2
-            result[save] = result.get(save, 0) + 1
-
-        neighborA = point[0], point[1] - 1
-        neighborB = point[0], point[1] + 1
-
-        if neighborA in visited and neighborB in visited:
-            save = abs(visited[neighborA] - visited[neighborB]) -2
-            result[save] = result.get(save, 0) + 1
+        save = visited[from_point] - visited[to_point] - distance
+        result[save] = result.get(save, 0) + 1
 
     return result
 
 
 def solution_for_first_part(task_input: Iterable[str]) -> int:
-    results = get_all_available_shortcuts(task_input)
+    results = get_all_available_shortcuts(task_input, 2)
 
     return sum(how_many for save, how_many in results.items() if save >= 100)
 
@@ -96,7 +91,7 @@ example_input = '''###############
 #...#...#...###
 ###############'''.splitlines()
 
-example_result = get_all_available_shortcuts(example_input)
+example_result = get_all_available_shortcuts(example_input, 2)
 
 assert example_result[2] == 14
 assert example_result[4] == 14
@@ -113,3 +108,29 @@ assert example_result[64] == 1
 # The input is taken from: https://adventofcode.com/2024/day/20/input
 task_input = list(load_input_file('input.20.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    results = get_all_available_shortcuts(task_input, 20)
+
+    return sum(how_many for save, how_many in results.items() if save >= 100)
+
+
+example_result = get_all_available_shortcuts(example_input, 20)
+
+assert example_result[50] == 32
+assert example_result[52] == 31
+assert example_result[54] == 29
+assert example_result[56] == 39
+assert example_result[58] == 25
+assert example_result[60] == 23
+assert example_result[62] == 20
+assert example_result[64] == 19
+assert example_result[66] == 12
+assert example_result[68] == 14
+assert example_result[70] == 12
+assert example_result[72] == 22
+assert example_result[74] == 4
+assert example_result[76] == 3
+
+print("Solution for the second part:", solution_for_second_part(task_input))
