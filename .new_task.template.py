@@ -1,4 +1,4 @@
-from typing import Generator, Iterable, List
+from typing import Generator, Iterable, Tuple
 import re
 import itertools
 import os
@@ -77,9 +77,11 @@ def visualization(point_dictionary):
 
 # 4 - direction
 # [(0, -1), (1, 0), (-1, 0), (0, 1)]
+# NEIGHBORS = (0, -1), (1, 0), (-1, 0), (0, 1)
 
 # 8 - direction
 # [(-1, -1), (0, -1), (1, -1), (-1, 0),  (1, 0), (-1, 1), (0, 1), (1, 1)]
+# NEIGHBORS = (-1, -1), (0, -1), (1, -1), (-1, 0),  (1, 0), (-1, 1), (0, 1), (1, 1)
 
 def bfs(_map, get_neighbors, start, end):
     to_check = collections.deque([start])
