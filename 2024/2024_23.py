@@ -1,4 +1,5 @@
-from typing import Generator, Iterable, Tuple
+from collections import defaultdict
+from typing import Dict, Generator, Iterable, Set, Tuple
 import itertools
 
 
@@ -7,34 +8,33 @@ def load_input_file(file_name: str) -> Generator[str, None, None]:
         yield from (line.rstrip() for line in file)
 
 
-def parse(task_input: Iterable[str]) -> Generator[Tuple[str, str], None, None]:
+def parse(task_input: Iterable[str]) -> Tuple[Set[Tuple[str, str]], Set[str]]:
+    connections = defaultdict(set)
+
     for line in task_input:
-        yield tuple(line.split('-'))
+        first_computer, second_computer = line.split('-')
+
+        connections[first_computer].add(second_computer)
+        connections[second_computer].add(first_computer)
+
+    return connections
 
 
 def solution_for_first_part(task_input: Iterable[str]) -> int:
-    connections = set()
-    computers = set()
-
-    for first_computer, second_computer in parse(task_input):
-        connections.add((first_computer, second_computer))
-        connections.add((second_computer, first_computer))
-        computers.add(first_computer)
-        computers.add(second_computer)
-
-
+    connections = parse(task_input)
     result = 0
-    for first_computer, second_computer, third_computer in itertools.combinations(computers, 3):
+
+    for first_computer, second_computer, third_computer in itertools.combinations(connections.keys(), 3):
         if not (first_computer.startswith('t') or second_computer.startswith('t') or third_computer.startswith('t')):
             continue
 
-        if (first_computer, second_computer) not in connections:
+        if second_computer not in connections[first_computer]:
             continue
 
-        if (second_computer, third_computer) not in connections:
+        if third_computer not in connections[first_computer]:
             continue
 
-        if (first_computer, third_computer) not in connections:
+        if second_computer not in connections[third_computer]:
             continue
 
         result += 1
@@ -80,3 +80,30 @@ assert solution_for_first_part(example_input) == 7
 # The input is taken from: https://adventofcode.com/2024/day/23/input
 task_input = list(load_input_file('input.23.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def bron_kerbosch_all_cliques(current_clique: Set[str], nodes_to_checked: Set[str], checked_nodes: Set[str], graph: Dict[str, Set[str]]):
+    yield current_clique
+    for v in list(nodes_to_checked):
+        yield from bron_kerbosch_all_cliques(
+                current_clique.union({v}),
+                nodes_to_checked.intersection(graph[v]),
+                checked_nodes.intersection(graph[v]),
+                graph,
+            )
+
+        nodes_to_checked.remove(v)
+        checked_nodes.add(v)
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> str:
+    connections = parse(task_input)
+
+    groups = list(bron_kerbosch_all_cliques(set(), set(connections.keys()), set(), connections))
+
+    the_largest_group = max(groups, key=lambda g: len(g))
+    return ','.join(sorted(the_largest_group))
+
+
+assert solution_for_second_part(example_input) == 'co,de,ka,ta'
+print("Solution for the second part:", solution_for_second_part(task_input))
