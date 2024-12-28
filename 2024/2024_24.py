@@ -101,3 +101,99 @@ assert solution_for_first_part(example_input) == 2024
 # The input is taken from: https://adventofcode.com/2024/day/24/input
 task_input = load_input_file('input.24.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+FIXES = [
+    # add pairs to be replaced:
+    #
+    # (which_gate, which_gate),
+    # (which_gate, which_gate),
+    # (which_gate, which_gate),
+    # (which_gate, which_gate),
+]
+
+
+def apply_fixes(instructions: Dict[str, Tuple[str, str, str]]) -> Dict[str, Tuple[str, str, str]]:
+    for a, b in FIXES:
+        instructions[a], instructions[b] = instructions[b], instructions[a]
+
+    return instructions
+
+
+def get_gates_for(instructions: Dict[str, Tuple[str, str, str]], gate_prefix: str) -> Iterable[str]:
+    return sorted(k for k in instructions.keys() if k.startswith(gate_prefix))
+
+
+def run_test(task_input: Iterable[str]) -> None:
+    gates_schema, instructions = parse(task_input)
+
+    apply_fixes(instructions)
+
+    new_gates_schema = {
+        key: 0
+        for key in gates_schema
+    }
+
+    for gate in get_gates_for(gates_schema, 'x'):
+        new_gates_schema[gate] = 1
+
+    for gate in get_gates_for(instructions, 'z'):
+        print(gate, new_gates_schema.get(gate.replace('z', 'x'), ' '), new_gates_schema.get(gate.replace('z', 'y'), ' '), get_gate_output(new_gates_schema, instructions, gate))
+
+
+def get_instructions_using_gate(instructions: Dict[str, Tuple[str, str, str]], gate: str) -> Dict[str, Tuple[str, str, str]]:
+    return {
+            k: instruction
+            for k, instruction in instructions.items()
+            if gate in instruction
+        }
+
+
+def print_gates_per_bit(task_input: Iterable[str]) -> None:
+    _, instructions = parse(task_input)
+
+    apply_fixes(instructions)
+
+    print('z00')
+    print('\t', 'z00', '=>', instructions['z00'], 'out')
+    for k, v in get_instructions_using_gate(instructions, 'x00').items():
+        if k != 'z00':
+            print('\t', k, '=>', v, 'out_carry')
+            carry = k
+
+    for bit_index in range(1, 45):
+
+        number = str(bit_index).zfill(2)
+        x_gate = 'x' + number
+        z_gate = 'z' + number
+        temp_gate = None
+
+        print(z_gate)
+        for k, v in get_instructions_using_gate(instructions, x_gate).items():
+            if 'XOR' in v:
+                print('\t', k, '=>', v, 'partial_sum')
+            elif 'AND' in v:
+                print('\t', k, '=>', v, 'carry1')
+
+        for k, v in get_instructions_using_gate(instructions, carry).items():
+            if 'AND' in v:
+                print('\t', k, '=>', v, 'carry2')
+                temp_gate = k
+
+        for k, v in get_instructions_using_gate(instructions, temp_gate).items():
+            if 'OR' in v:
+                print('\t', k, '=>', v, 'out_carry')
+                carry = k
+
+        print('\t', z_gate, '=>', instructions[z_gate], 'out')
+
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    return ','.join(sorted(wire for fix in FIXES for wire in fix))
+
+    run_test(task_input)
+    print_gates_per_bit(task_input)
+
+
+print("Solution for the second part:", solution_for_second_part(task_input))
