@@ -39,3 +39,26 @@ assert solution_for_first_part(example_input) == 1227775554
 # The input is taken from: https://adventofcode.com/2025/day/2/input
 task_input = load_input_file('input.02.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[Tuple[int, int]]) -> int:
+
+    def internal() -> Generator[int, None, None]:
+        for range_start, range_end in parse(task_input):
+            for product_id in range(range_start, range_end + 1):
+                id_as_string = str(product_id)
+                id_len = len(id_as_string)
+
+                for part_size in range(2, id_len + 1):
+                    if id_len % part_size != 0:
+                        continue
+
+                    if id_as_string[:(id_len // part_size)] * part_size == id_as_string:
+                        yield product_id
+
+
+    return sum(set(internal()))
+
+
+assert solution_for_second_part(example_input) == 4174379265
+print("Solution for the second part:", solution_for_second_part(task_input))
