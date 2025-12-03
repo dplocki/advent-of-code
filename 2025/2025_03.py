@@ -11,13 +11,33 @@ def parse(task_input: Iterable[str]) -> Generator[Tuple, None, None]:
         yield tuple(map(int, line))
 
 
+def the_highest_joltage(batteries: Tuple[int, ...], max_digits: int) -> int:
+    result = 0
+    start = 0
+    len_batteries = len(batteries)
+
+    for place_left in range(max_digits, 0, -1):
+        max_index = start
+        max_value = batteries[max_index]
+
+        for index in range(start + 1, len_batteries - place_left + 1):
+            if batteries[index] > max_value:
+                max_value = batteries[index]
+                max_index = index
+
+            if max_value == 9:
+                break
+
+        digit = batteries[max_index]
+        start = max_index + 1
+        result = result * 10 + digit
+
+    return result
+
+
 def solution_for_first_part(task_input: Iterable[str]) -> int:
     return sum(
-        max(
-            batteries[first] * 10 + batteries[second]
-            for first in range(len(batteries))
-            for second in range(first + 1, len(batteries))
-        )
+        the_highest_joltage(batteries, 2)
         for batteries in parse(task_input)
     )
 
@@ -35,31 +55,8 @@ print("Solution for the first part:", solution_for_first_part(task_input))
 
 
 def solution_for_second_part(task_input: Iterable[str]) -> int:
-    MAX_BATTERIES = 12
-
-    def internal(batteries, index, result, digits):
-        if digits == MAX_BATTERIES:
-            yield result
-            return
-
-        batteries_len = len(batteries)
-        the_largest_digit = 0
-
-        for i in range(index, batteries_len):
-            if i + (MAX_BATTERIES - digits - 1) >= batteries_len:
-                return
-
-            if batteries[i] <= the_largest_digit:
-                continue
-
-            the_largest_digit = batteries[i]
-            result *= 10
-            result += the_largest_digit
-            yield from internal(batteries, i + 1, result, digits + 1)
-            result //= 10
-
     return sum(
-        max(internal(batteries, 0, 0, 0))
+        the_highest_joltage(batteries, 12)
         for batteries in parse(task_input)
     )
 
