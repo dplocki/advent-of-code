@@ -1,4 +1,4 @@
-from typing import Generator, Iterable, Tuple
+from typing import Generator, Iterable, Set, Tuple
 
 
 DIRECTIONS = set(((-1, -1), (0, -1), (1, -1), (-1, 0),  (1, 0), (-1, 1), (0, 1), (1, 1)))
@@ -21,7 +21,8 @@ def parse(task_input: Iterable[str]) -> Generator[Tuple[int, int], None, None]:
                 yield row, column
 
 
-def solution_for_first_part(task_input: Iterable[str]) -> int:
+def simulation(task_input: Iterable[str]) -> Generator[Tuple[int, int], None, None]:
+
 
     def is_accessible_by_fork(row: int, column: int) -> bool:
         count = 0
@@ -34,7 +35,18 @@ def solution_for_first_part(task_input: Iterable[str]) -> int:
 
 
     grid = set(parse(task_input))
-    return sum(1 for r, c in grid if is_accessible_by_fork(r, c))
+    while True:
+        accessible = set((r, c) for r, c in grid if is_accessible_by_fork(r, c))
+
+        if len(accessible) == 0:
+            return
+
+        yield accessible
+        grid -= accessible
+
+
+def solution_for_first_part(task_input: Iterable[int]) -> int:
+    return len(next(simulation(task_input)))
 
 
 example_input = '''..@@.@@@@.
@@ -52,3 +64,11 @@ assert solution_for_first_part(example_input) == 13
 # The input is taken from: https://adventofcode.com/2025/day/4/input
 task_input = list(load_input_file('input.04.txt'))
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[int]) -> int:
+    return sum(map(len, simulation(task_input)))
+
+
+assert solution_for_second_part(example_input) == 43
+print("Solution for the second part:", solution_for_second_part(task_input))
