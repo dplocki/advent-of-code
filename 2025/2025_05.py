@@ -39,3 +39,27 @@ assert solution_for_first_part(example_input) == 3
 # The input is taken from: https://adventofcode.com/2025/day/5/input
 task_input = load_input_file('input.05.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Tuple[List[Tuple[int, int]], List[int]]) -> int:
+    ranges, _ = parse(task_input)
+
+    ranges.sort()
+    current_range_start = 0
+    current_range_finish = 0
+    result = -1
+
+    for start, finish in ranges:
+        if current_range_start <= start <= current_range_finish:
+            current_range_finish = max(finish, current_range_finish)
+        else:
+            result += current_range_finish - current_range_start + 1
+            current_range_start = start
+            current_range_finish = finish
+
+    result += current_range_finish - current_range_start + 1
+    return result
+
+
+assert solution_for_second_part(example_input) == 14
+print("Solution for the second part:", solution_for_second_part(task_input))
