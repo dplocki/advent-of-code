@@ -1,22 +1,15 @@
 from functools import reduce
+from itertools import groupby, zip_longest
 from operator import add, mul
-from typing import Callable, Generator, Iterable, Union
+from typing import Callable, Iterable, List
 
 
-def load_input_file(file_name: str) -> Generator[str, None, None]:
+def load_input_file(file_name: str) -> str:
     with open(file_name) as file:
-        yield from (line.rstrip() for line in file)
+        return file.read()
 
 
-def parse(task_input: Iterable[str]) -> Generator[Union[int, str], None, None]:
-    task_input = list(task_input)
-    for line in task_input[:-1]:
-        yield list(map(int, line.split()))
-
-    yield list(task_input[-1].split())
-
-
-def solution_for_first_part(task_input: Iterable[str]) -> int:
+def solutions(numbers: List[List[int]], operators: List[str]) -> int:
 
     def get_reducer_function(operator: str) -> Callable[[int, int], int]:
         if operator == '*':
@@ -27,19 +20,50 @@ def solution_for_first_part(task_input: Iterable[str]) -> int:
         return None
 
 
-    matrix = list(parse(task_input))
     return sum(
-        reduce(get_reducer_function(operator), (row[column_index] for row in matrix[:-1]))
-        for column_index, operator in enumerate(matrix[-1])
+        reduce(get_reducer_function(operator), (row[column_index] for row in numbers))
+        for column_index, operator in enumerate(operators)
     )
+
+
+def solution_for_first_part(lines: Iterable[str]) -> int:
+    lines = lines.splitlines()
+    numbers = [
+        tuple(map(int, line.split()))
+        for line in lines[:-1]
+    ]
+    operators = list(lines[-1].split())
+
+    return solutions(numbers, operators)
 
 
 example_input = '''123 328  51 64
  45 64  387 23
   6 98  215 314
-*   +   *   +  '''.splitlines()
+*   +   *   +  '''
 
 assert solution_for_first_part(example_input) == 4277556
 # The input is taken from: https://adventofcode.com/2025/day/6/input
-task_input = list(load_input_file('input.06.txt'))
+task_input = load_input_file('input.06.txt')
 print("Solution for the first part:", solution_for_first_part(task_input))
+
+
+def solution_for_second_part(task_input: Iterable[str]) -> int:
+    lines = task_input.splitlines()
+    operators = list(lines[-1].split())
+    numbers_tokens = (
+        ''.join(characters).strip()
+        for characters in zip_longest(*lines[:-1], fillvalue=' ')
+    )
+
+    numbers = [
+        list(map(int, group))
+        for key, group in groupby(numbers_tokens, lambda x: x == '')
+        if not key
+    ]
+
+    return solutions(list(zip(*numbers)), operators)
+
+
+assert solution_for_second_part(example_input) == 3263827
+print("Solution for the second part:", solution_for_second_part(task_input))
